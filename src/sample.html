@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>日報アプリ</title>
+    <style>
+      :root {
+        --blue: #2563eb;
+        --blue-light: #eff6ff;
+        --border: #dbe3ef;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --bg: #f8fbff;
+        --card: #ffffff;
+        --orange-bg: #fff7ed;
+        --orange-border: #fed7aa;
+        --orange-text: #b45309;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 24px 40px;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28px;
+      }
+
+      .title-area {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .app-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: var(--blue-light);
+        display: grid;
+        place-items: center;
+        color: var(--blue);
+        font-size: 24px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 26px;
+      }
+
+      .subtitle {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .history-button {
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text);
+        padding: 12px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        align-items: start;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 26px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+      }
+
+      .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--blue);
+        font-size: 22px;
+        margin: 0;
+      }
+
+      .section-description {
+        margin: 8px 0 28px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      label {
+        display: block;
+        font-weight: 700;
+        font-size: 14px;
+        margin: 18px 0 8px;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 13px 14px;
+        font-size: 15px;
+        background: white;
+        color: var(--text);
+        outline: none;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      }
+
+      textarea {
+        min-height: 96px;
+        resize: vertical;
+      }
+
+      .time-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 12px;
+        align-items: end;
+      }
+
+      .tilde {
+        padding-bottom: 13px;
+        color: var(--muted);
+      }
+
+      .work-time {
+        margin-top: 14px;
+        padding: 13px 14px;
+        border-radius: 8px;
+        background: var(--blue-light);
+        color: var(--blue);
+        font-weight: 700;
+        font-size: 14px;
+      }
+
+      .work-style {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .style-option {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px;
+        text-align: center;
+        cursor: pointer;
+        font-weight: 700;
+        background: white;
+      }
+
+      .style-option input {
+        display: none;
+      }
+
+      .style-option.active {
+        border-color: var(--blue);
+        background: var(--blue-light);
+        color: var(--blue);
+      }
+
+      .buttons {
+        display: grid;
+        grid-template-columns: 0.9fr 1fr 1.3fr;
+        gap: 12px;
+        border-top: 1px solid var(--border);
+        padding-top: 24px;
+        margin-top: 24px;
+      }
+
+      button {
+        border: none;
+        border-radius: 8px;
+        padding: 14px 18px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .secondary {
+        background: white;
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+
+      .primary {
+        background: var(--blue);
+        color: white;
+      }
+
+      .preview-mobile-button {
+        display: none;
+      }
+
+      .note {
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      .preview-box {
+        border: 1px solid #bfdbfe;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #ffffff, #f8fbff);
+        padding: 22px;
+        white-space: pre-wrap;
+        line-height: 1.8;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        min-height: 250px;
+        word-break: break-word;
+      }
+
+      .tip-box {
+        margin-top: 24px;
+        border: 1px solid var(--orange-border);
+        border-radius: 8px;
+        background: var(--orange-bg);
+        color: var(--orange-text);
+        padding: 18px 20px;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      .history-list {
+        margin-top: 24px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+      }
+
+      .history-title {
+        padding: 18px;
+        font-weight: 800;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .history-item:last-child {
+        border-bottom: none;
+      }
+
+      .history-date {
+        font-weight: 800;
+        margin-bottom: 5px;
+      }
+
+      .history-summary {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .small-copy {
+        border: 1px solid #bfdbfe;
+        background: white;
+        color: var(--blue);
+        padding: 9px 14px;
+        white-space: nowrap;
+      }
+
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 36px;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.48);
+        display: none;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 16px;
+        z-index: 100;
+      }
+
+      .modal-overlay.open {
+        display: flex;
+      }
+
+      .modal {
+        width: 100%;
+        max-width: 620px;
+        max-height: 86vh;
+        overflow: auto;
+        background: white;
+        border-radius: 16px 16px 10px 10px;
+        padding: 20px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+        animation: slideUp 0.18s ease-out;
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(24px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .modal-header h2 {
+        margin: 0;
+        color: var(--blue);
+        font-size: 20px;
+      }
+
+      .close-button {
+        background: white;
+        border: 1px solid var(--border);
+        padding: 9px 12px;
+      }
+
+      .modal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        header {
+          align-items: flex-start;
+          gap: 16px;
+          flex-direction: column;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page {
+          padding: 18px 14px 32px;
+        }
+        h1 {
+          font-size: 22px;
+        }
+        .card {
+          padding: 18px;
+        }
+        .time-grid {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        .tilde {
+          display: none;
+        }
+        .buttons {
+          grid-template-columns: 1fr;
+        }
+        .preview-card {
+          display: none;
+        }
+        .preview-mobile-button {
+          display: block;
+        }
+        .history-button {
+          width: 100%;
+        }
+        .history-item {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .small-copy {
+          width: 100%;
+        }
+        .modal-actions {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div class="title-area">
+          <div class="app-icon">📋</div>
+          <div>
+            <h1>日報アプリ</h1>
+            <p class="subtitle">毎日の業務内容を簡単に作成・コピー</p>
+          </div>
+        </div>
+        <button class="history-button">↻ 履歴一覧</button>
+      </header>
+
+      <main class="layout">
+        <section class="card">
+          <h2 class="section-heading">✏️ 日報入力</h2>
+          <p class="section-description">各項目を入力してください</p>
+
+          <label for="date">日付</label>
+          <input id="date" type="date" />
+
+          <label>出退勤時間</label>
+          <div class="time-grid">
+            <div>
+              <label
+                for="inTime"
+                style="margin-top: 0; color: #6b7280; font-weight: 600"
+                >出勤時間（in）</label
+              >
+              <input id="inTime" type="time" value="09:00" />
+            </div>
+            <div class="tilde">〜</div>
+            <div>
+              <label
+                for="outTime"
+                style="margin-top: 0; color: #6b7280; font-weight: 600"
+                >退勤時間（out）</label
+              >
+              <input id="outTime" type="time" value="18:00" />
+            </div>
+          </div>
+
+          <div class="work-time" id="workTime">勤務時間：8時間00分</div>
+
+          <label for="projectName">PJ名</label>
+          <input id="projectName" type="text" value="○○システム保守開発" />
+
+          <label for="clientName">常駐先企業名</label>
+          <input id="clientName" type="text" value="株式会社○○" />
+
+          <label for="workPlace">出社場所</label>
+          <input id="workPlace" type="text" value="渋谷オフィス" />
+
+          <label>勤務形態</label>
+          <div class="work-style">
+            <label class="style-option" id="officeOption">
+              <input type="radio" name="workStyle" value="出社" />
+              🏢 出社
+            </label>
+            <label class="style-option active" id="remoteOption">
+              <input type="radio" name="workStyle" value="在宅" checked />
+              🏠 在宅
+            </label>
+          </div>
+
+          <label for="memo">メモ（任意）</label>
+          <textarea
+            id="memo"
+            placeholder="特記事項があれば入力してください"
+          ></textarea>
+
+          <div class="buttons">
+            <button class="secondary" id="copyLastButton">↩ 前回コピー</button>
+            <button
+              class="secondary preview-mobile-button"
+              id="openPreviewButton"
+            >
+              👁️ プレビュー
+            </button>
+            <button class="primary" id="copyPreviewButton">
+              📋 クリップボードにコピー
+            </button>
+          </div>
+          <div class="note">※ スマホではプレビューをボタンから確認できます</div>
+        </section>
+
+        <section class="card preview-card">
+          <h2 class="section-heading">👁️ プレビュー</h2>
+          <p class="section-description">コピーされる内容を確認してください</p>
+
+          <div class="preview-box" id="preview"></div>
+
+          <div class="tip-box">
+            <strong>💡 コピーのポイント</strong>
+            <ul>
+              <li>上記の内容がそのままクリップボードにコピーされます</li>
+              <li>Slackの日報チャンネルに貼り付けて利用できます</li>
+              <li>必要に応じて各項目を編集してからコピーしてください</li>
+            </ul>
+          </div>
+
+          <div class="history-list">
+            <div class="history-title">最近の履歴</div>
+            <div class="history-item">
+              <div>
+                <div class="history-date">2026-03-30（月）</div>
+                <div class="history-summary">
+                  09:00〜18:00 / ○○システム保守開発 / 渋谷オフィス(在宅)
+                </div>
+              </div>
+              <button class="small-copy">コピー</button>
+            </div>
+            <div class="history-item">
+              <div>
+                <div class="history-date">2026-03-29（日）</div>
+                <div class="history-summary">
+                  09:00〜18:00 / △△システム開発 / 渋谷オフィス(出社)
+                </div>
+              </div>
+              <button class="small-copy">コピー</button>
+            </div>
+            <div class="history-item">
+              <div>
+                <div class="history-date">2026-03-28（土）</div>
+                <div class="history-summary">
+                  10:00〜19:00 / 運用保守 / 在宅
+                </div>
+              </div>
+              <button class="small-copy">コピー</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer>© 2026 日報アプリ. All rights reserved.</footer>
+    </div>
+
+    <div class="modal-overlay" id="previewModal" aria-hidden="true">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <div class="modal-header">
+          <h2 id="modalTitle">👁️ プレビュー</h2>
+          <button class="close-button" id="closePreviewButton">閉じる</button>
+        </div>
+        <div class="preview-box" id="modalPreview"></div>
+        <div class="modal-actions">
+          <button class="secondary" id="modalCloseButton">戻る</button>
+          <button class="primary" id="modalCopyButton">📋 コピー</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const dateInput = document.getElementById("date");
+      const inTimeInput = document.getElementById("inTime");
+      const outTimeInput = document.getElementById("outTime");
+      const projectInput = document.getElementById("projectName");
+      const clientInput = document.getElementById("clientName");
+      const placeInput = document.getElementById("workPlace");
+      const memoInput = document.getElementById("memo");
+      const preview = document.getElementById("preview");
+      const modalPreview = document.getElementById("modalPreview");
+      const workTime = document.getElementById("workTime");
+      const officeOption = document.getElementById("officeOption");
+      const remoteOption = document.getElementById("remoteOption");
+      const copyPreviewButton = document.getElementById("copyPreviewButton");
+      const copyLastButton = document.getElementById("copyLastButton");
+      const openPreviewButton = document.getElementById("openPreviewButton");
+      const closePreviewButton = document.getElementById("closePreviewButton");
+      const modalCloseButton = document.getElementById("modalCloseButton");
+      const modalCopyButton = document.getElementById("modalCopyButton");
+      const previewModal = document.getElementById("previewModal");
+
+      const STORAGE_KEY = "daily-report-last";
+
+      function setToday() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const dd = String(today.getDate()).padStart(2, "0");
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+
+      function formatDate(dateString) {
+        if (!dateString) return "";
+        const date = new Date(`${dateString}T00:00:00`);
+        const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+        return `${date.getMonth() + 1}/${date.getDate()}(${weekdays[date.getDay()]})`;
+      }
+
+      function selectedWorkStyle() {
+        return document.querySelector('input[name="workStyle"]:checked').value;
+      }
+
+      function calculateWorkTime() {
+        const [inHour, inMinute] = inTimeInput.value.split(":").map(Number);
+        const [outHour, outMinute] = outTimeInput.value.split(":").map(Number);
+        const start = inHour * 60 + inMinute;
+        const end = outHour * 60 + outMinute;
+        const diff = Math.max(end - start - 60, 0);
+        const hours = Math.floor(diff / 60);
+        const minutes = diff % 60;
+        workTime.textContent = `勤務時間：${hours}時間${String(minutes).padStart(2, "0")}分`;
+      }
+
+      function buildText() {
+        const memo = memoInput.value.trim();
+        return `① 出退勤（in-out）\n--------------------\n${formatDate(dateInput.value)}　${inTimeInput.value}〜${outTimeInput.value}\n\n② PJ名 / 常駐先企業名 / 出社場所\n--------------------\n${projectInput.value || "（未入力）"} / ${clientInput.value || "（未入力）"} / ${placeInput.value || "（未入力）"}(${selectedWorkStyle()})${memo ? `\n\nメモ\n--------------------\n${memo}` : ""}`;
+      }
+
+      function renderPreview() {
+        calculateWorkTime();
+        const text = buildText();
+        preview.textContent = text;
+        modalPreview.textContent = text;
+      }
+
+      function saveCurrentAsLast() {
+        const data = {
+          date: dateInput.value,
+          inTime: inTimeInput.value,
+          outTime: outTimeInput.value,
+          projectName: projectInput.value,
+          clientName: clientInput.value,
+          workPlace: placeInput.value,
+          workStyle: selectedWorkStyle(),
+          memo: memoInput.value,
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+
+      function loadLast() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          alert(
+            "前回データがありません。先にクリップボードコピーを実行すると保存されます。",
+          );
+          return;
+        }
+        const data = JSON.parse(raw);
+        dateInput.value = data.date;
+        inTimeInput.value = data.inTime;
+        outTimeInput.value = data.outTime;
+        projectInput.value = data.projectName;
+        clientInput.value = data.clientName;
+        placeInput.value = data.workPlace;
+        memoInput.value = data.memo || "";
+        document.querySelector(
+          `input[name="workStyle"][value="${data.workStyle}"]`,
+        ).checked = true;
+        updateStyleOption();
+        renderPreview();
+      }
+
+      function updateStyleOption() {
+        const style = selectedWorkStyle();
+        officeOption.classList.toggle("active", style === "出社");
+        remoteOption.classList.toggle("active", style === "在宅");
+      }
+
+      async function copyText(button) {
+        const text = buildText();
+        await navigator.clipboard.writeText(text);
+        saveCurrentAsLast();
+        const before = button.textContent;
+        button.textContent = "✅ コピーしました";
+        setTimeout(() => (button.textContent = before), 1400);
+      }
+
+      function openModal() {
+        renderPreview();
+        previewModal.classList.add("open");
+        previewModal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeModal() {
+        previewModal.classList.remove("open");
+        previewModal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      }
+
+      copyPreviewButton.addEventListener("click", () =>
+        copyText(copyPreviewButton),
+      );
+      modalCopyButton.addEventListener("click", () =>
+        copyText(modalCopyButton),
+      );
+      copyLastButton.addEventListener("click", loadLast);
+      openPreviewButton.addEventListener("click", openModal);
+      closePreviewButton.addEventListener("click", closeModal);
+      modalCloseButton.addEventListener("click", closeModal);
+      previewModal.addEventListener("click", (event) => {
+        if (event.target === previewModal) closeModal();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeModal();
+      });
+
+      document.querySelectorAll("input, textarea").forEach((el) => {
+        el.addEventListener("input", renderPreview);
+        el.addEventListener("change", renderPreview);
+      });
+
+      document.querySelectorAll('input[name="workStyle"]').forEach((el) => {
+        el.addEventListener("change", () => {
+          updateStyleOption();
+          renderPreview();
+        });
+      });
+
+      setToday();
+      renderPreview();
+    </script>
+  </body>
+</html>
