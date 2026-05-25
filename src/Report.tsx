@@ -13,6 +13,7 @@ interface TimeRange {
   startTime: TimeString;
   endTime: TimeString;
 }
+
 const ReportForm = () => {
   const [formData, setFormData] = useState({ reportInput: "" });
   const [errors, setErrors] = useState({ reportInput: "" });
@@ -21,6 +22,7 @@ const ReportForm = () => {
     startTime: "09:00",
     endTime: "18:00",
   });
+  const [workStyle,setWorkStyle] = useState<string>("");
 
   /**
    * 初期表示時の日付セット処理
@@ -130,12 +132,15 @@ const ReportForm = () => {
 
           <label>勤務形態</label>
           <div className="work-style">
-            <label className="style-option" id="officeOption">
-              <input type="radio" name="workStyle" value="出社" />
+            <label className={`style-option ${workStyle === "出社" ? "active" : ""}`} id="officeOption">
+              <input type="radio" name="workStyle" value="出社"
+              checked={workStyle == "出社"}
+              onChange={(e)=> {setWorkStyle(e.target.value)}} />
               🏢 出社
             </label>
-            <label className="style-option active" id="remoteOption">
-              <input type="radio" name="workStyle" value="在宅" checked />
+            <label className={`style-option ${workStyle === "在宅" ? "active" : ""}`} id="remoteOption">
+              <input type="radio" name="workStyle" value="在宅" checked={workStyle == "在宅"}
+                onChange={(e)=> {setWorkStyle(e.target.value)}}/>
               🏠 在宅
             </label>
           </div>
