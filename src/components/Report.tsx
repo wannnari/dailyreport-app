@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 
-import "./Report.css";
+import "/css/Report.css";
 import "./App.css";
+
+import { Report } from "../types/report";
 
 // 1桁の数字を表す型
 type Digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
@@ -14,7 +16,12 @@ interface TimeRange {
   endTime: TimeString;
 }
 
-const ReportForm = () => {
+type Props = {
+  report: Report;
+  setReport: React.Dispatch<React.SetStateAction<Report>>;
+};
+
+const DailyReportForm = ({ report, setReport }: Props) => {
   const [formData, setFormData] = useState({ reportInput: "" });
   const [errors, setErrors] = useState({ reportInput: "" });
   const [dateInput, setDate] = useState<string>();
@@ -22,7 +29,7 @@ const ReportForm = () => {
     startTime: "09:00",
     endTime: "18:00",
   });
-  const [workStyle,setWorkStyle] = useState<string>("");
+  const [workStyle, setWorkStyle] = useState<string>("");
 
   /**
    * 初期表示時の日付セット処理
@@ -122,31 +129,55 @@ const ReportForm = () => {
           </div>
 
           <label htmlFor="projectName">PJ名</label>
-          <input id="projectName" type="text" value="○○システム保守開発" />
+          <input id="projectName" type="text" value={report.projectName} />
 
           <label htmlFor="clientName">常駐先企業名</label>
-          <input id="clientName" type="text" value="株式会社○○" />
+          <input id="clientName" type="text" value={report.clientName} />
 
           <label htmlFor="workPlace">出社場所</label>
-          <input id="workPlace" type="text" value="渋谷オフィス" />
+          <input id="workPlace" type="text" value={report.workPlace} />
 
           <label>勤務形態</label>
           <div className="work-style">
-            <label className={`style-option ${workStyle === "出社" ? "active" : ""}`} id="officeOption">
-              <input type="radio" name="workStyle" value="出社"
-              checked={workStyle == "出社"}
-              onChange={(e)=> {setWorkStyle(e.target.value)}} />
+            <label
+              className={`style-option ${workStyle === "出社" ? "active" : ""}`}
+              id="officeOption"
+            >
+              <input
+                type="radio"
+                name="workStyle"
+                value="出社"
+                checked={workStyle == "出社"}
+                onChange={(e) => {
+                  setWorkStyle(e.target.value);
+                }}
+              />
               🏢 出社
             </label>
-            <label className={`style-option ${workStyle === "在宅" ? "active" : ""}`} id="remoteOption">
-              <input type="radio" name="workStyle" value="在宅" checked={workStyle == "在宅"}
-                onChange={(e)=> {setWorkStyle(e.target.value)}}/>
+            <label
+              className={`style-option ${workStyle === "在宅" ? "active" : ""}`}
+              id="remoteOption"
+            >
+              <input
+                type="radio"
+                name="workStyle"
+                value="在宅"
+                checked={workStyle == "在宅"}
+                onChange={(e) => {
+                  setWorkStyle(e.target.value);
+                }}
+              />
               🏠 在宅
             </label>
+            <input type="hidden" value={report.workStyle} />
           </div>
 
           <label htmlFor="memo">所感</label>
-          <textarea id="memo" placeholder="所感を入力してください"></textarea>
+          <textarea
+            id="memo"
+            placeholder="所感を入力してください"
+            value={report.memo}
+          ></textarea>
 
           <div className="buttons">
             <button className="secondary" id="copyLastButton">
@@ -170,5 +201,3 @@ const ReportForm = () => {
     </div>
   );
 };
-
-export default ReportForm;

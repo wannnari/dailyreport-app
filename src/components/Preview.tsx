@@ -2,6 +2,35 @@ import React, { useState } from "react";
 import "./App.css";
 
 const Preview = () => {
+  // const openPreviewButton = document.getElementById("openPreviewButton");
+  // openPreviewButton.addEventListener("click", openModal);
+  // const previewModal = document.getElementById("previewModal");
+
+  // function openModal() {
+  //   renderPreview();
+  //   previewModal.classList.add("open");
+  //   previewModal.setAttribute("aria-hidden", "false");
+  //   document.body.style.overflow = "hidden";
+  // }
+
+  // function closeModal() {
+  //   previewModal.classList.remove("open");
+  //   previewModal.setAttribute("aria-hidden", "true");
+  //   document.body.style.overflow = "";
+  // }
+
+  // previewModal.addEventListener("click", (event) => {
+  //   if (event.target === previewModal) closeModal();
+  // });
+
+  // function renderPreview() {
+  //   const text = buildText();
+  //   preview.textContent = text;
+  //   modalPreview.textContent = text;
+  // }
+
+  // function buildText() {}
+
   return (
     <div className="modal-overlay" id="previewModal" aria-hidden="true">
       <div

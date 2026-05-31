@@ -1,11 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "./logo.svg";
 import { Routes, Route, Link } from "react-router-dom";
-import ReportForm from "./Report";
+import ReportForm from "./components/Report";
+import Preview from "./components/Preview";
+import { Report } from "./types/report";
 import ListForm from "./ListForm";
 import "./App.css";
 
 function App() {
+  const [report, setReport] = useState({
+    date: "",
+    inTime: "",
+    outTime: "",
+    projectName: "",
+    clientName: "",
+    workPlace: "",
+    workStyle: "在宅",
+  });
+
   return (
     <div className="App">
       <header className="App-header">
@@ -27,8 +39,11 @@ function App() {
         </nav>
       </header>
       <Routes>
-        <Route path="/" element={<ReportForm />} />
-        <Route path="/about" element={<ListForm />} />
+        <Route
+          path="/components/"
+          element={<ReportForm report={report} setReport={setReport} />}
+        />
+        <Route element={<Preview report={report} />} />
       </Routes>
     </div>
   );
