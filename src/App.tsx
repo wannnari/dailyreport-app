@@ -8,42 +8,25 @@ import ListForm from "./ListForm";
 import "./App.css";
 
 function App() {
-  const [report, setReport] = useState({
+  const [report, setReport] = useState<Report>({
     date: "",
-    inTime: "",
-    outTime: "",
+    inTime: "09:00",
+    outTime: "18:00",
     projectName: "",
     clientName: "",
     workPlace: "",
     workStyle: "在宅",
+    workMemo: "",
+    memo: "",
   });
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <nav>
-          {/* Linkコンポーネントでナビゲーションを作成 */}
-          <Link to="/">日報入力</Link> | <Link to="/list">リスト</Link>
-        </nav>
-      </header>
       <Routes>
         <Route
-          path="/components/"
+          path="/"
           element={<ReportForm report={report} setReport={setReport} />}
         />
-        <Route element={<Preview report={report} />} />
       </Routes>
     </div>
   );

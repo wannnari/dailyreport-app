@@ -1,35 +1,21 @@
 import React, { useState, useEffect } from "react";
 
-import "/css/Report.css";
-import "./App.css";
+import "../css/Report.css";
+import "../App.css";
 
 import { Report } from "../types/report";
-
-// 1桁の数字を表す型
-type Digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
-
-// 時刻の形式（例: 09:00 や 23:59）を表現する型
-type TimeString = `${Digit}${Digit}:${Digit}${Digit}`;
-
-interface TimeRange {
-  startTime: TimeString;
-  endTime: TimeString;
-}
+import { TimeRange,TimeString} from "../types/Time";
+import Preview from "./Preview";
 
 type Props = {
   report: Report;
   setReport: React.Dispatch<React.SetStateAction<Report>>;
 };
 
-const DailyReportForm = ({ report, setReport }: Props) => {
-  const [formData, setFormData] = useState({ reportInput: "" });
+export default function ReportForm ({ report, setReport }: Props) {
   const [errors, setErrors] = useState({ reportInput: "" });
-  const [dateInput, setDate] = useState<string>();
-  const [timeRange, setTimeRange] = useState<TimeRange>({
-    startTime: "09:00",
-    endTime: "18:00",
-  });
   const [workStyle, setWorkStyle] = useState<string>("");
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
   /**
    * 初期表示時の日付セット処理
@@ -40,7 +26,10 @@ const DailyReportForm = ({ report, setReport }: Props) => {
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
     const dataInput = `${yyyy}-${mm}-${dd}`;
-    setDate(dataInput);
+    setReport((prev) =>({
+      ...prev,
+      ["date"]:dataInput,
+    }));
   };
 
   // 初期表示処理
@@ -51,26 +40,30 @@ const DailyReportForm = ({ report, setReport }: Props) => {
   // 開始・終了時間のonChangeイベント
   const handleChangeTime = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    setTimeRange((prev) => ({
+    setReport((prev) =>({
       ...prev,
-      [name]: value as TimeString,
+      [name]:value as TimeString,
     }));
   };
 
-  const handleChangeDate = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDate(e.target.value);
-  };
+  const handleReportChange = (e:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>{
+    const {name, value} = e.target;
+
+    setReport((prev) =>({
+      ...prev,
+      [name]:value,
+    }));
+  }
 
   // バリデーション
   const validate = () => {
     const newErrors = { reportInput: "" };
     let isValid = true;
-    if (!formData.reportInput) {
-      newErrors.reportInput = "内容を入力してください";
-      isValid = false;
-    }
-    setErrors(newErrors);
+    // if (!formData.reportInput) {
+    //   newErrors.reportInput = "内容を入力してください";
+    //   isValid = false;
+    // }
+    // setErrors(newErrors);
     return isValid;
   };
 
@@ -84,10 +77,11 @@ const DailyReportForm = ({ report, setReport }: Props) => {
           <label htmlFor="date">日付</label>
           <input
             id="date"
+            name="date"
             type="date"
-            value={dateInput}
-            onChange={handleChangeDate}
-          />
+            value={report.date}
+            onChange={handleReportChange}
+            />
 
           <label>出退勤時間</label>
           <div className="time-grid">
@@ -100,9 +94,9 @@ const DailyReportForm = ({ report, setReport }: Props) => {
               </label>
               <input
                 id="inTime"
-                name="startTime"
+                name="inTime"
                 type="time"
-                value={timeRange.startTime}
+                value={report.inTime}
                 onChange={handleChangeTime}
               />
             </div>
@@ -117,8 +111,8 @@ const DailyReportForm = ({ report, setReport }: Props) => {
               <input
                 id="outTime"
                 type="time"
-                name="endTime"
-                value={timeRange.endTime}
+                name="outTime"
+                value={report.outTime}
                 onChange={handleChangeTime}
               />
             </div>
@@ -129,13 +123,13 @@ const DailyReportForm = ({ report, setReport }: Props) => {
           </div>
 
           <label htmlFor="projectName">PJ名</label>
-          <input id="projectName" type="text" value={report.projectName} />
+          <input id="projectName" name="projectName" type="text" value={report.projectName} onChange={handleReportChange}/>
 
           <label htmlFor="clientName">常駐先企業名</label>
-          <input id="clientName" type="text" value={report.clientName} />
+          <input id="clientName" name="clientName" type="text" value={report.clientName} onChange={handleReportChange}/>
 
           <label htmlFor="workPlace">出社場所</label>
-          <input id="workPlace" type="text" value={report.workPlace} />
+          <input id="workPlace" name="workPlace" type="text" value={report.workPlace} onChange={handleReportChange}/>
 
           <label>勤務形態</label>
           <div className="work-style">
@@ -169,14 +163,25 @@ const DailyReportForm = ({ report, setReport }: Props) => {
               />
               🏠 在宅
             </label>
-            <input type="hidden" value={report.workStyle} />
+            <input type="hidden" name="workStyle" value={report.workStyle} onChange={handleReportChange}/>
           </div>
+
+          <label htmlFor="memo">作業内容</label>
+          <textarea
+            id="workmemo"
+            placeholder="作業内容を入力してください"
+            name="workmemo"
+            value={report.workMemo}
+            onChange={handleReportChange}
+          ></textarea>
 
           <label htmlFor="memo">所感</label>
           <textarea
             id="memo"
             placeholder="所感を入力してください"
+            name="memo"
             value={report.memo}
+            onChange={handleReportChange}
           ></textarea>
 
           <div className="buttons">
@@ -186,6 +191,7 @@ const DailyReportForm = ({ report, setReport }: Props) => {
             <button
               className="secondary preview-mobile-button"
               id="openPreviewButton"
+              onClick={() => setIsPreviewOpen(true)}
             >
               👁️ プレビュー
             </button>
@@ -197,6 +203,10 @@ const DailyReportForm = ({ report, setReport }: Props) => {
             ※ スマホではプレビューをボタンから確認できます
           </div>
         </section>
+        {isPreviewOpen &&
+        (<Preview report={report}
+          onClose={()=> setIsPreviewOpen(false)} />
+        )}
       </main>
     </div>
   );

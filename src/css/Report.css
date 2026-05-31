@@ -231,6 +231,7 @@ button {
   white-space: pre-wrap;
   line-height: 1.8;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  text-align: left;
   min-height: 250px;
   word-break: break-word;
 }
@@ -302,7 +303,6 @@ footer {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.48);
-  display: none;
   align-items: flex-end;
   justify-content: center;
   padding: 16px;

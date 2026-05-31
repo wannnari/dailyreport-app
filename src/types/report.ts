@@ -1,4 +1,4 @@
-import { TimeRange } from "./Time";
+import { TimeString} from "./Time";
 
 /**
  * Reportインターフェース
@@ -11,5 +11,6 @@ export interface Report {
   clientName: string;
   workPlace: string;
   workStyle: string;
+  workMemo: string;
   memo: string;
 }

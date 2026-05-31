@@ -1,38 +1,14 @@
-import React, { useState } from "react";
-import "./App.css";
+import "../App.css";
+import { Report } from "../types/report";
 
-const Preview = () => {
-  // const openPreviewButton = document.getElementById("openPreviewButton");
-  // openPreviewButton.addEventListener("click", openModal);
-  // const previewModal = document.getElementById("previewModal");
+type Props = {
+  report: Report;
+  onClose: () => void;
+};
 
-  // function openModal() {
-  //   renderPreview();
-  //   previewModal.classList.add("open");
-  //   previewModal.setAttribute("aria-hidden", "false");
-  //   document.body.style.overflow = "hidden";
-  // }
-
-  // function closeModal() {
-  //   previewModal.classList.remove("open");
-  //   previewModal.setAttribute("aria-hidden", "true");
-  //   document.body.style.overflow = "";
-  // }
-
-  // previewModal.addEventListener("click", (event) => {
-  //   if (event.target === previewModal) closeModal();
-  // });
-
-  // function renderPreview() {
-  //   const text = buildText();
-  //   preview.textContent = text;
-  //   modalPreview.textContent = text;
-  // }
-
-  // function buildText() {}
-
+const Preview = ({report, onClose}: Props) => {
   return (
-    <div className="modal-overlay" id="previewModal" aria-hidden="true">
+    <div className="modal-overlay" id="previewModal" aria-hidden="true" onClick={onClose}>
       <div
         className="modal"
         role="dialog"
@@ -45,9 +21,15 @@ const Preview = () => {
             閉じる
           </button>
         </div>
-        <div className="preview-box" id="modalPreview"></div>
+        <div className="preview-box" id="modalPreview" >
+        <p>① {report.date} {report.inTime}~{report.outTime}</p>
+        <p>② {report.projectName}/{report.clientName}/{report.workPlace}({report.workStyle})</p>
+        <p>③ 作業内容</p>
+        <p>④ {report.memo}</p>
+        <p>⑤ 0.0h</p>
+        </div>
         <div className="modal-actions">
-          <button className="secondary" id="modalCloseButton">
+          <button className="secondary" id="modalCloseButton" onClick={onClose}>
             戻る
           </button>
           <button className="primary" id="modalCopyButton">
