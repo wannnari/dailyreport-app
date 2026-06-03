@@ -13,4 +13,6 @@ export interface Report {
   workStyle: string;
   workMemo: string;
   memo: string;
+  overTime: string;
+  workTime: string;
 }

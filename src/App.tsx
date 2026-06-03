@@ -18,6 +18,8 @@ function App() {
     workStyle: "在宅",
     workMemo: "",
     memo: "",
+    overTime: "0.00h",
+    workTime: "8時間00分"
   });
 
   return (

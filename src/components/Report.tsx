@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactEventHandler } from "react";
 
 import "../css/Report.css";
 import "../App.css";
 
+import { buildReportText } from "../utils/buildReportText";
+import { calcWorkTime } from "../utils/calcWorkTime";
 import { Report } from "../types/report";
-import { TimeRange,TimeString} from "../types/Time";
+import { TimeString} from "../types/Time";
 import Preview from "./Preview";
+import { calcOverTime } from "../utils/calcOverTime";
 
 type Props = {
   report: Report;
@@ -16,6 +19,7 @@ export default function ReportForm ({ report, setReport }: Props) {
   const [errors, setErrors] = useState({ reportInput: "" });
   const [workStyle, setWorkStyle] = useState<string>("");
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
+  const previewText = buildReportText(report);
 
   /**
    * 初期表示時の日付セット処理
@@ -37,13 +41,30 @@ export default function ReportForm ({ report, setReport }: Props) {
     setTodayForInitialize();
   }, []);
 
+  const handleChangeWorkingTime = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const {id, value} = e.target;
+    const inTIme = report.inTime;
+    const outTime = report.outTime;
+
+
+  }
+
   // 開始・終了時間のonChangeイベント
   const handleChangeTime = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setReport((prev) =>({
+
+    setReport((prev) =>{
+      const nextReport = {
       ...prev,
-      [name]:value as TimeString,
-    }));
+      [name]:value as TimeString
+      };
+
+      return{
+        ...nextReport,
+        workTime: calcWorkTime(nextReport.inTime, nextReport.outTime),
+        overTime: calcOverTime(nextReport.inTime, nextReport.outTime),
+      };
+    });
   };
 
   const handleReportChange = (e:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>{
@@ -54,6 +75,7 @@ export default function ReportForm ({ report, setReport }: Props) {
       [name]:value,
     }));
   }
+
 
   // バリデーション
   const validate = () => {
@@ -66,6 +88,29 @@ export default function ReportForm ({ report, setReport }: Props) {
     // setErrors(newErrors);
     return isValid;
   };
+
+  const copyToClipboard = async (text:string) =>{
+    try{
+      await navigator.clipboard.writeText(text);
+      alert("コピーしました");
+    }catch{
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+
+      alert("コピーしました");
+    }
+
+  }
+
 
   return (
     <div className="Report">
@@ -119,7 +164,7 @@ export default function ReportForm ({ report, setReport }: Props) {
           </div>
 
           <div className="work-time" id="workTime">
-            勤務時間：8時間00分
+            勤務時間：{report.workTime} (残業時間：{report.overTime})
           </div>
 
           <label htmlFor="projectName">PJ名</label>
@@ -168,9 +213,9 @@ export default function ReportForm ({ report, setReport }: Props) {
 
           <label htmlFor="memo">作業内容</label>
           <textarea
-            id="workmemo"
+            id="workMSemo"
             placeholder="作業内容を入力してください"
-            name="workmemo"
+            name="workMemo"
             value={report.workMemo}
             onChange={handleReportChange}
           ></textarea>
@@ -195,7 +240,7 @@ export default function ReportForm ({ report, setReport }: Props) {
             >
               👁️ プレビュー
             </button>
-            <button className="primary" id="copyPreviewButton">
+            <button className="primary" id="copyPreviewButton" onClick={() => copyToClipboard(previewText)}>
               📋 クリップボードにコピー
             </button>
           </div>
