@@ -41,14 +41,6 @@ export default function ReportForm ({ report, setReport }: Props) {
     setTodayForInitialize();
   }, []);
 
-  const handleChangeWorkingTime = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const {id, value} = e.target;
-    const inTIme = report.inTime;
-    const outTime = report.outTime;
-
-
-  }
-
   // 開始・終了時間のonChangeイベント
   const handleChangeTime = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

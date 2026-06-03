@@ -1,5 +1,6 @@
 import "../App.css";
 import { Report } from "../types/report";
+import { formatDateMMDDwithDay } from "../utils/formatDateMMDDwithDay";
 
 type Props = {
   report: Report;
@@ -7,6 +8,7 @@ type Props = {
 };
 
 const Preview = ({report, onClose}: Props) => {
+  const date = formatDateMMDDwithDay(report.date);
   return (
     <div className="modal-overlay" id="previewModal" aria-hidden="true" onClick={onClose}>
       <div
@@ -22,11 +24,11 @@ const Preview = ({report, onClose}: Props) => {
           </button>
         </div>
         <div className="preview-box" id="modalPreview" >
-        <p>① {report.date} {report.inTime}~{report.outTime}</p>
+        <p>① {date} {report.inTime}~{report.outTime}</p>
         <p>② {report.projectName}/{report.clientName}/{report.workPlace}({report.workStyle})</p>
         <p>③ {report.workMemo}</p>
         <p>④ {report.memo}</p>
-        <p>⑤ 0.0h</p>
+        <p>⑤ {report.overTime}</p>
         </div>
         <div className="modal-actions">
           <button className="secondary" id="modalCloseButton" onClick={onClose}>
