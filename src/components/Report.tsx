@@ -9,6 +9,7 @@ import { Report } from "../types/report";
 import { TimeString} from "../types/Time";
 import Preview from "./Preview";
 import { calcOverTime } from "../utils/calcOverTime";
+import {copyToClipboard } from "../utils/CopyToClipboard";
 
 type Props = {
   report: Report;
@@ -80,29 +81,6 @@ export default function ReportForm ({ report, setReport }: Props) {
     // setErrors(newErrors);
     return isValid;
   };
-
-  const copyToClipboard = async (text:string) =>{
-    try{
-      await navigator.clipboard.writeText(text);
-      alert("コピーしました");
-    }catch{
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-
-      document.body.appendChild(textarea);
-      textarea.focus();
-      textarea.select();
-
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-
-      alert("コピーしました");
-    }
-
-  }
-
 
   return (
     <div className="Report">

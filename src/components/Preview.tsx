@@ -1,6 +1,8 @@
 import "../App.css";
 import { Report } from "../types/report";
 import { formatDateMMDDwithDay } from "../utils/formatDateMMDDwithDay";
+import {copyToClipboard } from "../utils/CopyToClipboard";
+import { buildReportText } from "../utils/buildReportText";
 
 type Props = {
   report: Report;
@@ -9,6 +11,7 @@ type Props = {
 
 const Preview = ({report, onClose}: Props) => {
   const date = formatDateMMDDwithDay(report.date);
+  const reportText = buildReportText(report);
   return (
     <div className="modal-overlay" id="previewModal" aria-hidden="true" onClick={onClose}>
       <div
@@ -34,7 +37,7 @@ const Preview = ({report, onClose}: Props) => {
           <button className="secondary" id="modalCloseButton" onClick={onClose}>
             戻る
           </button>
-          <button className="primary" id="modalCopyButton">
+          <button className="primary" id="modalCopyButton" onClick={()=>copyToClipboard(reportText)}>
             📋 コピー
           </button>
         </div>

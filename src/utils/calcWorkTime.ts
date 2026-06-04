@@ -9,7 +9,10 @@ export const calcWorkTime = (
     const [outH, outM] = outTime.split(":").map(Number);
 
     const inMinutes = inH * 60 + inM;
-    const outMinutes = outH * 60 + outM;
+    let outMinutes = outH * 60 + outM;
+    if(outMinutes < inMinutes){
+        outMinutes += 24 * 60;
+    }
 
     const workMinutes = outMinutes - inMinutes - breakMinutes;
 
