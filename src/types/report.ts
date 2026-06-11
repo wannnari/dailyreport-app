@@ -34,7 +34,7 @@ export const InitialReport: Report = {
   projectName: "",
   clientName: "",
   workPlace: "",
-  workStyle: "在宅",
+  workStyle: "出社",
   workMemo: "",
   memo: "",
   overTime: "0.00h",

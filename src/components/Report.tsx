@@ -199,41 +199,31 @@ export default function ReportForm({ report, setReport }: Props) {
           <label>勤務形態</label>
           <div className="work-style">
             <label
-              className={`style-option ${workStyle === "出社" ? "active" : ""}`}
+              className={`style-option ${report.workStyle === "出社" ? "active" : ""}`}
               id="officeOption"
             >
               <input
                 type="radio"
                 name="workStyle"
                 value="出社"
-                checked={workStyle == "出社"}
-                onChange={(e) => {
-                  setWorkStyle(e.target.value);
-                }}
+                checked={report.workStyle == "出社"}
+                onChange={handleReportChange}
               />
               🏢 出社
             </label>
             <label
-              className={`style-option ${workStyle === "在宅" ? "active" : ""}`}
+              className={`style-option ${report.workStyle === "在宅" ? "active" : ""}`}
               id="remoteOption"
             >
               <input
                 type="radio"
                 name="workStyle"
                 value="在宅"
-                checked={workStyle == "在宅"}
-                onChange={(e) => {
-                  setWorkStyle(e.target.value);
-                }}
+                checked={report.workStyle == "在宅"}
+                onChange={handleReportChange}
               />
               🏠 在宅
             </label>
-            <input
-              type="hidden"
-              name="workStyle"
-              value={report.workStyle}
-              onChange={handleReportChange}
-            />
           </div>
 
           <label htmlFor="memo">作業内容</label>

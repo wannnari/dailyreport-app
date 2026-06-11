@@ -30,8 +30,9 @@ const ReportListModal = ({ reports, onClose, onSelect }: Props) => {
                 <div>
                   <div className="history-date">{report.date}</div>
                   <div className="history-summary">
-                    {report.inTime}〜{report.outTime} / {report.projectName} /{" "}
-                    {report.workPlace}（{report.workStyle}）
+                    ①{report.inTime}〜{report.outTime} / ②{report.projectName} /{" "}
+                    ③{report.workPlace}（{report.workStyle}）/ ④
+                    {report.workMemo} / ⑤{report.memo}
                   </div>
                 </div>
 
