@@ -1,4 +1,4 @@
-import { TimeString} from "./Time";
+import { TimeString } from "./Time";
 
 /**
  * Reportインターフェース
@@ -16,3 +16,27 @@ export interface Report {
   overTime: string;
   workTime: string;
 }
+/**
+ * 初期表示時の日付セット処理
+ *  */
+const setTodayForInitialize = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+export const InitialReport: Report = {
+  date: setTodayForInitialize(),
+  inTime: "09:00",
+  outTime: "18:00",
+  projectName: "",
+  clientName: "",
+  workPlace: "",
+  workStyle: "在宅",
+  workMemo: "",
+  memo: "",
+  overTime: "0.00h",
+  workTime: "8時間00分",
+};

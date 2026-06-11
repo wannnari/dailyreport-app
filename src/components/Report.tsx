@@ -5,54 +5,35 @@ import "../App.css";
 
 import { buildReportText } from "../utils/buildReportText";
 import { calcWorkTime } from "../utils/calcWorkTime";
-import { Report } from "../types/report";
-import { TimeString} from "../types/Time";
+import { Report, InitialReport } from "../types/report";
+import { TimeString } from "../types/Time";
 import Preview from "./Preview";
 import { calcOverTime } from "../utils/calcOverTime";
-import {copyToClipboard } from "../utils/CopyToClipboard";
+import { copyToClipboard } from "../utils/CopyToClipboard";
+import ReportListModal from "../components/ReportListModal";
 
 type Props = {
   report: Report;
   setReport: React.Dispatch<React.SetStateAction<Report>>;
 };
 
-export default function ReportForm ({ report, setReport }: Props) {
-  const [errors, setErrors] = useState({ reportInput: "" });
+export default function ReportForm({ report, setReport }: Props) {
+  // const [errors, setErrors] = useState({ reportInput: "" });
   const [workStyle, setWorkStyle] = useState<string>("");
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const previewText = buildReportText(report);
-
-  /**
-   * 初期表示時の日付セット処理
-   *  */
-  const setTodayForInitialize = () => {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-    const dataInput = `${yyyy}-${mm}-${dd}`;
-    setReport((prev) =>({
-      ...prev,
-      ["date"]:dataInput,
-    }));
-  };
-
-  // 初期表示処理
-  React.useEffect(() => {
-    setTodayForInitialize();
-  }, []);
+  const [isListOpen, setIsListOpen] = useState(false);
+  const [reports, setReports] = useState<Report[]>([]);
 
   // 開始・終了時間のonChangeイベント
   const handleChangeTime = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    setReport((prev) =>{
+    setReport((prev) => {
       const nextReport = {
-      ...prev,
-      [name]:value as TimeString
+        ...prev,
+        [name]: value as TimeString,
       };
-
-      return{
+      return {
         ...nextReport,
         workTime: calcWorkTime(nextReport.inTime, nextReport.outTime),
         overTime: calcOverTime(nextReport.inTime, nextReport.outTime),
@@ -60,15 +41,52 @@ export default function ReportForm ({ report, setReport }: Props) {
     });
   };
 
-  const handleReportChange = (e:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>{
-    const {name, value} = e.target;
+  /**
+   * Report項目Changeイベント(時間以外)
+   * @param e
+   */
+  const handleReportChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
 
-    setReport((prev) =>({
+    setReport((prev) => ({
       ...prev,
-      [name]:value,
+      [name]: value,
     }));
-  }
+  };
 
+  /*
+   * 日報保存処理
+   */
+  const saveReport = () => {
+    const reports = JSON.parse(
+      localStorage.getItem("reports") ?? "[]",
+    ) as Report[];
+
+    const nextReports = [{ ...report }, ...reports];
+    localStorage.setItem("reports", JSON.stringify(nextReports));
+    localStorage.setItem("lastReport", JSON.stringify(report));
+
+    alert("保存しました");
+  };
+
+  /**
+   * 前回の日報読み込み処理
+   */
+  const loadLastReport = () => {
+    const data = localStorage.getItem("lastReport");
+    if (!data) {
+      alert("保存された日報がありません");
+      return;
+    }
+    const lastReoprt: Report = JSON.parse(data) as Report;
+    setReport({
+      ...InitialReport,
+      ...lastReoprt,
+      memo: "",
+    });
+  };
 
   // バリデーション
   const validate = () => {
@@ -82,8 +100,22 @@ export default function ReportForm ({ report, setReport }: Props) {
     return isValid;
   };
 
+  /**
+   * 一覧表示ボタン押下処理
+   */
+  const openList = () => {
+    const savedReports = JSON.parse(
+      localStorage.getItem("reports") ?? "[]",
+    ) as Report[];
+    setReports(savedReports);
+    setIsListOpen(true);
+  };
+
   return (
     <div className="Report">
+      <button className="history-button" onClick={openList}>
+        ↻ 履歴一覧
+      </button>
       <main className="layout">
         <section className="card">
           <h2 className="section-heading">✏️ 日報入力</h2>
@@ -94,9 +126,9 @@ export default function ReportForm ({ report, setReport }: Props) {
             id="date"
             name="date"
             type="date"
-            value={report.date}
+            value={report.date ?? ""}
             onChange={handleReportChange}
-            />
+          />
 
           <label>出退勤時間</label>
           <div className="time-grid">
@@ -138,13 +170,31 @@ export default function ReportForm ({ report, setReport }: Props) {
           </div>
 
           <label htmlFor="projectName">PJ名</label>
-          <input id="projectName" name="projectName" type="text" value={report.projectName} onChange={handleReportChange}/>
+          <input
+            id="projectName"
+            name="projectName"
+            type="text"
+            value={report.projectName}
+            onChange={handleReportChange}
+          />
 
           <label htmlFor="clientName">常駐先企業名</label>
-          <input id="clientName" name="clientName" type="text" value={report.clientName} onChange={handleReportChange}/>
+          <input
+            id="clientName"
+            name="clientName"
+            type="text"
+            value={report.clientName}
+            onChange={handleReportChange}
+          />
 
           <label htmlFor="workPlace">出社場所</label>
-          <input id="workPlace" name="workPlace" type="text" value={report.workPlace} onChange={handleReportChange}/>
+          <input
+            id="workPlace"
+            name="workPlace"
+            type="text"
+            value={report.workPlace}
+            onChange={handleReportChange}
+          />
 
           <label>勤務形態</label>
           <div className="work-style">
@@ -178,7 +228,12 @@ export default function ReportForm ({ report, setReport }: Props) {
               />
               🏠 在宅
             </label>
-            <input type="hidden" name="workStyle" value={report.workStyle} onChange={handleReportChange}/>
+            <input
+              type="hidden"
+              name="workStyle"
+              value={report.workStyle}
+              onChange={handleReportChange}
+            />
           </div>
 
           <label htmlFor="memo">作業内容</label>
@@ -198,9 +253,19 @@ export default function ReportForm ({ report, setReport }: Props) {
             value={report.memo}
             onChange={handleReportChange}
           ></textarea>
-
           <div className="buttons">
-            <button className="secondary" id="copyLastButton">
+            <button
+              className="secondary"
+              id="cooyButtton"
+              onClick={() => saveReport()}
+            >
+              この日報を保存
+            </button>
+            <button
+              className="secondary"
+              id="copyLastButton"
+              onClick={() => loadLastReport()}
+            >
               ↩ 前回コピー
             </button>
             <button
@@ -210,7 +275,11 @@ export default function ReportForm ({ report, setReport }: Props) {
             >
               👁️ プレビュー
             </button>
-            <button className="primary" id="copyPreviewButton" onClick={() => copyToClipboard(previewText)}>
+            <button
+              className="primary"
+              id="copyPreviewButton"
+              onClick={() => copyToClipboard(previewText)}
+            >
               📋 クリップボードにコピー
             </button>
           </div>
@@ -218,11 +287,24 @@ export default function ReportForm ({ report, setReport }: Props) {
             ※ スマホではプレビューをボタンから確認できます
           </div>
         </section>
-        {isPreviewOpen &&
-        (<Preview report={report}
-          onClose={()=> setIsPreviewOpen(false)} />
+        {isPreviewOpen && (
+          <Preview report={report} onClose={() => setIsPreviewOpen(false)} />
+        )}
+        {isListOpen && (
+          <ReportListModal
+            reports={reports}
+            onClose={() => setIsListOpen(false)}
+            onSelect={(selectedReport) => {
+              setReport({
+                ...InitialReport,
+                ...selectedReport,
+                memo: "",
+              });
+              setIsListOpen(false);
+            }}
+          />
         )}
       </main>
     </div>
   );
-};
+}

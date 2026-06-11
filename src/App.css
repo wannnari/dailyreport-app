@@ -36,3 +36,41 @@
     transform: rotate(360deg);
   }
 }
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.48);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.listModalContent {
+  width: min(92vw, 720px);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  color: #2563eb;
+}
+
+.emptyText {
+  color: #6b7280;
+  text-align: center;
+  padding: 32px 0;
+}
