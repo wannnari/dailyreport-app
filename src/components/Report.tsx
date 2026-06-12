@@ -11,6 +11,8 @@ import Preview from "./Preview";
 import { calcOverTime } from "../utils/calcOverTime";
 import { copyToClipboard } from "../utils/CopyToClipboard";
 import ReportListModal from "../components/ReportListModal";
+import { validateReport } from "../utils/ValidateReport";
+import { validateErrors } from "../types/validateErrors";
 
 type Props = {
   report: Report;
@@ -18,8 +20,7 @@ type Props = {
 };
 
 export default function ReportForm({ report, setReport }: Props) {
-  // const [errors, setErrors] = useState({ reportInput: "" });
-  const [workStyle, setWorkStyle] = useState<string>("");
+  const [errors, setErrors] = useState<validateErrors>();
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const previewText = buildReportText(report);
   const [isListOpen, setIsListOpen] = useState(false);
@@ -56,6 +57,19 @@ export default function ReportForm({ report, setReport }: Props) {
     }));
   };
 
+  /**
+   * エラーチェック
+   * @returns
+   */
+  const validate = (): Boolean => {
+    const validationErrors = validateReport(report);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+      return false;
+    }
+    return true;
+  };
   /*
    * 日報保存処理
    */
@@ -86,18 +100,6 @@ export default function ReportForm({ report, setReport }: Props) {
       ...lastReoprt,
       memo: "",
     });
-  };
-
-  // バリデーション
-  const validate = () => {
-    const newErrors = { reportInput: "" };
-    let isValid = true;
-    // if (!formData.reportInput) {
-    //   newErrors.reportInput = "内容を入力してください";
-    //   isValid = false;
-    // }
-    // setErrors(newErrors);
-    return isValid;
   };
 
   /**
@@ -237,17 +239,21 @@ export default function ReportForm({ report, setReport }: Props) {
 
           <label htmlFor="memo">所感</label>
           <textarea
+            className={errors?.memo ? "input-error" : ""}
             id="memo"
             placeholder="所感を入力してください"
             name="memo"
             value={report.memo}
             onChange={handleReportChange}
           ></textarea>
+          {errors?.memo && <p className="field-error">{errors.memo}</p>}
           <div className="buttons">
             <button
               className="secondary"
               id="cooyButtton"
-              onClick={() => saveReport()}
+              onClick={() => {
+                if (validate()) saveReport();
+              }}
             >
               この日報を保存
             </button>
@@ -268,7 +274,9 @@ export default function ReportForm({ report, setReport }: Props) {
             <button
               className="primary"
               id="copyPreviewButton"
-              onClick={() => copyToClipboard(previewText)}
+              onClick={() => {
+                if (validate()) copyToClipboard(previewText);
+              }}
             >
               📋 クリップボードにコピー
             </button>

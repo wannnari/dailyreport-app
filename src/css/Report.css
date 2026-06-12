@@ -413,3 +413,8 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+label {
+  display: block;
+  text-align: left;
+}
