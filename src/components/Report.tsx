@@ -17,9 +17,10 @@ import { validateErrors } from "../types/validateErrors";
 type Props = {
   report: Report;
   setReport: React.Dispatch<React.SetStateAction<Report>>;
+  showMessage: (text: string) => void;
 };
 
-export default function ReportForm({ report, setReport }: Props) {
+export default function ReportForm({ report, setReport, showMessage }: Props) {
   const [errors, setErrors] = useState<validateErrors>();
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const previewText = buildReportText(report);
@@ -82,7 +83,7 @@ export default function ReportForm({ report, setReport }: Props) {
     localStorage.setItem("reports", JSON.stringify(nextReports));
     localStorage.setItem("lastReport", JSON.stringify(report));
 
-    alert("保存しました");
+    showMessage("保存しました");
   };
 
   /**
@@ -91,7 +92,7 @@ export default function ReportForm({ report, setReport }: Props) {
   const loadLastReport = () => {
     const data = localStorage.getItem("lastReport");
     if (!data) {
-      alert("保存された日報がありません");
+      showMessage("保存された日報がありません");
       return;
     }
     const lastReoprt: Report = JSON.parse(data) as Report;
@@ -275,7 +276,10 @@ export default function ReportForm({ report, setReport }: Props) {
               className="primary"
               id="copyPreviewButton"
               onClick={() => {
-                if (validate()) copyToClipboard(previewText);
+                if (validate()) {
+                  copyToClipboard(previewText);
+                  showMessage("保存しました");
+                }
               }}
             >
               📋 クリップボードにコピー
