@@ -3,16 +3,19 @@ import React, { useState, useEffect, ReactEventHandler } from "react";
 import "../css/Report.css";
 import "../App.css";
 
-import { buildReportText } from "../utils/buildReportText";
-import { calcWorkTime } from "../utils/calcWorkTime";
+import PreviewPanel from "./PreviewPanel";
+import ReportListModal from "../components/ReportListModal";
+import PreviewModal from "./PreviewModal";
+
 import { Report, InitialReport } from "../types/report";
 import { TimeString } from "../types/Time";
-import Preview from "./Preview";
+import { validateErrors } from "../types/validateErrors";
+
+import { buildReportText } from "../utils/buildReportText";
+import { calcWorkTime } from "../utils/calcWorkTime";
 import { calcOverTime } from "../utils/calcOverTime";
 import { copyToClipboard } from "../utils/CopyToClipboard";
-import ReportListModal from "../components/ReportListModal";
 import { validateReport } from "../utils/ValidateReport";
-import { validateErrors } from "../types/validateErrors";
 
 type Props = {
   report: Report;
@@ -266,7 +269,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
               ↩ 前回コピー
             </button>
             <button
-              className="secondary preview-mobile-button"
+              className="secondary preview-mobile-button preview-mobile"
               id="openPreviewButton"
               onClick={() => setIsPreviewOpen(true)}
             >
@@ -289,8 +292,14 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
             ※ スマホではプレビューをボタンから確認できます
           </div>
         </section>
+        <div className="preview-desktop">
+          <PreviewPanel report={report} />
+        </div>
         {isPreviewOpen && (
-          <Preview report={report} onClose={() => setIsPreviewOpen(false)} />
+          <PreviewModal
+            report={report}
+            onClose={() => setIsPreviewOpen(false)}
+          />
         )}
         {isListOpen && (
           <ReportListModal
