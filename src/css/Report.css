@@ -436,3 +436,14 @@ label {
     display: block;
   }
 }
+.tip-box {
+  margin-top: 24px;
+  border: 1px solid var(--orange-border);
+  border-radius: 8px;
+  background: var(--orange-bg);
+  color: var(--orange-text);
+  padding: 18px 20px;
+  font-size: 14px;
+  line-height: 1.8;
+  text-align: left;
+}

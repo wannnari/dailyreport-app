@@ -1,6 +1,6 @@
 const NoticeSection = () => {
   return (
-    <div className="notice-box">
+    <div className="tip-box">
       <h3>注意事項</h3>
 
       <ul>
