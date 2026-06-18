@@ -293,7 +293,12 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
           </div>
         </section>
         <div className="preview-desktop">
-          <PreviewPanel report={report} />
+          <PreviewPanel
+            report={report}
+            histories={
+              JSON.parse(localStorage.getItem("reports") ?? "[]") as Report[]
+            }
+          />
         </div>
         {isPreviewOpen && (
           <PreviewModal

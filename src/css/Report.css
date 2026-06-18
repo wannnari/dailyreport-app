@@ -447,3 +447,42 @@ label {
   line-height: 1.8;
   text-align: left;
 }
+
+.history-list {
+  margin-top: 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  text-align: left;
+}
+
+.history-title {
+  padding: 18px;
+  font-weight: 800;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-date {
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.history-summary {
+  color: var(--muted);
+  font-size: 13px;
+}
