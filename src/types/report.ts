@@ -19,7 +19,7 @@ export interface Report {
 /**
  * 初期表示時の日付セット処理
  *  */
-const setTodayForInitialize = () => {
+export const setTodayForInitialize = () => {
   const today = new Date();
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth() + 1).padStart(2, "0");

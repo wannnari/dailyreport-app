@@ -7,7 +7,7 @@ import PreviewPanel from "./PreviewPanel";
 import ReportListModal from "../components/ReportListModal";
 import PreviewModal from "./PreviewModal";
 
-import { Report, InitialReport } from "../types/report";
+import { Report, InitialReport, setTodayForInitialize } from "../types/report";
 import { TimeString } from "../types/Time";
 import { validateErrors } from "../types/validateErrors";
 
@@ -103,6 +103,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
       ...InitialReport,
       ...lastReoprt,
       memo: "",
+      date: setTodayForInitialize(),
     });
   };
 
@@ -234,12 +235,14 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
 
           <label htmlFor="memo">作業内容</label>
           <textarea
-            id="workMSemo"
+            className={errors?.workMemo ? "input-error" : ""}
+            id="workMemo"
             placeholder="作業内容を入力してください"
             name="workMemo"
             value={report.workMemo}
             onChange={handleReportChange}
           ></textarea>
+          {errors?.workMemo && <p className="field-error">{errors.workMemo}</p>}
 
           <label htmlFor="memo">所感</label>
           <textarea

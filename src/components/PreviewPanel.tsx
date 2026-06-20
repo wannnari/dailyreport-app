@@ -11,7 +11,7 @@ const PreviewPanel = ({
   histories: Report[];
 }) => {
   return (
-    <section className="preview-panel">
+    <section className="card preview-panel">
       <h2>プレビュー</h2>
       <PreviewContent report={report} />
       <NoticeSection />
