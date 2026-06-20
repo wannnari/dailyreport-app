@@ -9,8 +9,11 @@ const RecentHistory = ({ histories }: { histories: Report[] }) => {
       {recent.map((history, index) => (
         <div key={index} className="history-item">
           <div className="history-date">{history.date}</div>
-          <div>{history.projectName}</div>
+          <div>
+            {history.inTime}~{history.outTime}({history.overTime})
+          </div>
           <div>{history.workStyle}</div>
+          <div>{history.memo}</div>
         </div>
       ))}
     </div>

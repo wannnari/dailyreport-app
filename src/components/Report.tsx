@@ -29,6 +29,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
   const previewText = buildReportText(report);
   const [isListOpen, setIsListOpen] = useState(false);
   const [reports, setReports] = useState<Report[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // 開始・終了時間のonChangeイベント
   const handleChangeTime = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,6 +75,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
     }
     return true;
   };
+
   /*
    * 日報保存処理
    */
@@ -82,11 +84,51 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
       localStorage.getItem("reports") ?? "[]",
     ) as Report[];
 
-    const nextReports = [{ ...report }, ...reports];
+    if (editingId) {
+      // 編集モードの場合は更新処理
+      const updatedReports = reports.map((item) =>
+        item.id === editingId ? { ...report, id: editingId } : item,
+      );
+      localStorage.setItem("reports", JSON.stringify(updatedReports));
+      localStorage.setItem(
+        "lastReport",
+        JSON.stringify({ ...report, id: editingId }),
+      );
+
+      setReports(updatedReports);
+      setEditingId(null);
+      showMessage("更新しました");
+      return;
+    }
+
+    // editingIdがない場合は、新規登録処理
+    const reportToSave: Report = {
+      ...report,
+      id: report.id || crypto.randomUUID(),
+    };
+    const nextReports = [reportToSave, ...reports];
     localStorage.setItem("reports", JSON.stringify(nextReports));
     localStorage.setItem("lastReport", JSON.stringify(report));
-
+    setReports(nextReports);
     showMessage("保存しました");
+  };
+
+  /**
+   * 削除処理
+   */
+  const deleteReport = (id: string) => {
+    if (!window.confirm("この日報を削除しますか？")) return;
+
+    const reports = JSON.parse(
+      localStorage.getItem("reports") ?? "[]",
+    ) as Report[];
+
+    const nextReports = reports.filter((item) => item.id !== id);
+
+    localStorage.setItem("reports", JSON.stringify(nextReports));
+    setReports(nextReports);
+
+    showMessage("削除しました");
   };
 
   /**
@@ -118,6 +160,17 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
     setIsListOpen(true);
   };
 
+  /**
+   * 編集モード時処理
+   */
+  const startedEditReport = (selectedReport: Report) => {
+    setReport({ ...InitialReport, ...selectedReport });
+
+    setEditingId(selectedReport.id);
+    setIsListOpen(false);
+    showMessage("編集モードにしました");
+  };
+
   return (
     <div className="Report">
       <button className="history-button" onClick={openList}>
@@ -127,7 +180,12 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
         <section className="card">
           <h2 className="section-heading">✏️ 日報入力</h2>
           <p className="section-description">各項目を入力してください</p>
-
+          {editingId && (
+            <div className="edit-mode-banner">
+              編集モード：保存すると既存の履歴を更新します
+              <button onClick={() => setEditingId(null)}>解除</button>
+            </div>
+          )}
           <label htmlFor="date">日付</label>
           <input
             id="date"
@@ -321,6 +379,8 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
               });
               setIsListOpen(false);
             }}
+            onEdit={startedEditReport}
+            onDelete={deleteReport}
           />
         )}
       </main>

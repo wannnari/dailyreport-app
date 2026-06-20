@@ -487,3 +487,50 @@ label {
   color: var(--muted);
   font-size: 13px;
 }
+
+.history-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.action-button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.reflect {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.edit {
+  color: #374151;
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.delete {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+@media (max-width: 640px) {
+  .history-item {
+    flex-direction: column;
+  }
+
+  .history-actions {
+    width: 100%;
+  }
+
+  .action-button {
+    flex: 1;
+  }
+}

@@ -4,6 +4,7 @@ import { TimeString } from "./Time";
  * Reportインターフェース
  */
 export interface Report {
+  id: string;
   date: string;
   inTime: TimeString;
   outTime: TimeString;
@@ -28,6 +29,7 @@ export const setTodayForInitialize = () => {
 };
 
 export const InitialReport: Report = {
+  id: "",
   date: setTodayForInitialize(),
   inTime: "09:00",
   outTime: "18:00",

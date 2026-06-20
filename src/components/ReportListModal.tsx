@@ -4,9 +4,17 @@ type Props = {
   reports: Report[];
   onClose: () => void;
   onSelect: (report: Report) => void;
+  onEdit: (report: Report) => void;
+  onDelete: (id: string) => void;
 };
 
-const ReportListModal = ({ reports, onClose, onSelect }: Props) => {
+const ReportListModal = ({
+  reports,
+  onClose,
+  onSelect,
+  onEdit,
+  onDelete,
+}: Props) => {
   return (
     <div className="modalOverlay" onClick={onClose}>
       <div
@@ -36,9 +44,34 @@ const ReportListModal = ({ reports, onClose, onSelect }: Props) => {
                   </div>
                 </div>
 
-                <button className="small-copy" onClick={() => onSelect(report)}>
-                  反映
-                </button>
+                <div className="history-actions">
+                  <button
+                    className="action-button reflect"
+                    onClick={() => onSelect(report)}
+                  >
+                    反映
+                  </button>
+
+                  <button
+                    className="action-button edit"
+                    onClick={() => {
+                      console.log("edit", report);
+                      onEdit(report);
+                    }}
+                  >
+                    編集
+                  </button>
+
+                  <button
+                    className="action-button delete"
+                    onClick={() => {
+                      console.log("delete", report.id);
+                      onDelete(report.id);
+                    }}
+                  >
+                    削除
+                  </button>
+                </div>
               </div>
             ))}
           </div>

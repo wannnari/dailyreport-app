@@ -12,7 +12,7 @@ const PreviewPanel = ({
 }) => {
   return (
     <section className="card preview-panel">
-      <h2>プレビュー</h2>
+      <h2 section-heading>プレビュー</h2>
       <PreviewContent report={report} />
       <NoticeSection />
       <RecentHistory histories={histories} />
