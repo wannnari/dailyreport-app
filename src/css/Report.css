@@ -69,6 +69,7 @@ h1 {
   color: var(--text);
   padding: 12px 18px;
   border-radius: 8px;
+  margin-left: auto;
   cursor: pointer;
   font-weight: 600;
 }
@@ -369,8 +370,6 @@ footer {
   }
   header {
     align-items: flex-start;
-    gap: 16px;
-    flex-direction: column;
   }
 }
 
@@ -571,4 +570,10 @@ label {
     display: block;
   }
 
+}
+.page-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  text-align: left;
 }

@@ -173,7 +173,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
 
   return (
     <div className="report">
-      <header>
+      <header className="page-header">
         <div className="title-area">
           <div className="app-icon">📋</div>
           <div>
@@ -181,7 +181,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
             <p className="subtitle">毎日の業務内容を簡単に作成・コピー</p>
           </div>
         </div>
-        <button className="history-button" onClick={openList}>
+        <button className="history-button desktop-only" onClick={openList}>
           ↻ 履歴一覧
         </button>
       </header>
@@ -338,7 +338,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
             >
               ↩ 前回コピー
             </button>
-            <button className="history-button mobile-only" onClick={openList}>
+            <button className="secondary mobile-only" onClick={openList}>
               ↻ 履歴一覧 ({reports.length}件)
             </button>
             <button
