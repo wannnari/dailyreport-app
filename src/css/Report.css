@@ -534,3 +534,15 @@ label {
     flex: 1;
   }
 }
+
+.history-notice {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+
+  color: #92400e;
+  font-size: 13px;
+  text-align: left;
+}

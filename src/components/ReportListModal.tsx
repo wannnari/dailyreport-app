@@ -25,6 +25,7 @@ const ReportListModal = ({
       >
         <div className="modalHeader">
           <h2>履歴一覧</h2>
+          <div className="history-notice">※ 反映時、所感は引き継がれません</div>
           <button className="secondary" onClick={onClose}>
             閉じる
           </button>

@@ -173,9 +173,18 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
 
   return (
     <div className="Report">
-      <button className="history-button" onClick={openList}>
-        ↻ 履歴一覧
-      </button>
+      <header>
+        <div className="title-area">
+          <div className="app-icon">📋</div>
+          <div>
+            <h1>日報アプリ</h1>
+            <p className="subtitle">毎日の業務内容を簡単に作成・コピー</p>
+          </div>
+        </div>
+        <button className="history-button" onClick={openList}>
+          ↻ 履歴一覧
+        </button>
+      </header>
       <main className="layout">
         <section className="card">
           <h2 className="section-heading">✏️ 日報入力</h2>
@@ -378,6 +387,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
                 memo: "",
               });
               setIsListOpen(false);
+              showMessage("履歴を反映しました（所感は引き継がれません）");
             }}
             onEdit={startedEditReport}
             onDelete={deleteReport}
