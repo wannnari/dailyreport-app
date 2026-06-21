@@ -5,7 +5,7 @@ const RecentHistory = ({ histories }: { histories: Report[] }) => {
   return (
     <div className="history-list">
       <h3 className="history-title">直近3件</h3>
-
+      {histories.length == 0 && <div className="history-item">保存された履歴はありません</div>}
       {recent.map((history, index) => (
         <div key={index} className="history-item">
           <div className="history-date">{history.date}</div>

@@ -172,7 +172,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
   };
 
   return (
-    <div className="Report">
+    <div className="report">
       <header>
         <div className="title-area">
           <div className="app-icon">📋</div>
@@ -337,6 +337,9 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
               onClick={() => loadLastReport()}
             >
               ↩ 前回コピー
+            </button>
+            <button className="history-button mobile-only" onClick={openList}>
+              ↻ 履歴一覧 ({reports.length}件)
             </button>
             <button
               className="secondary preview-mobile-button preview-mobile"
