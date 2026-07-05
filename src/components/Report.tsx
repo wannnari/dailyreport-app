@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ReactEventHandler } from "react";
+import React, { useState } from "react";
 
 import "../css/Report.css";
 import "../App.css";
