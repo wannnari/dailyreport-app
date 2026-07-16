@@ -146,6 +146,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
       ...lastReoprt,
       memo: "",
       date: setTodayForInitialize(),
+      id: "",
     });
   };
 
@@ -329,7 +330,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
                 if (validate()) saveReport();
               }}
             >
-              この日報を保存
+              履歴に保存
             </button>
             <button
               className="secondary"
