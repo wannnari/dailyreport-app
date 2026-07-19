@@ -1,5 +1,6 @@
 {
   "name": "dailyreport-app",
+  "homepage": "https://wannnari.github.io/dailyreport-app/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
