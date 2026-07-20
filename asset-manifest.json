@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/dailyreport-app/static/css/main.3f443273.css",
-    "main.js": "/dailyreport-app/static/js/main.a92c7273.js",
+    "main.js": "/dailyreport-app/static/js/main.acd08893.js",
     "static/js/453.39fa0abe.chunk.js": "/dailyreport-app/static/js/453.39fa0abe.chunk.js",
     "index.html": "/dailyreport-app/index.html",
     "main.3f443273.css.map": "/dailyreport-app/static/css/main.3f443273.css.map",
-    "main.a92c7273.js.map": "/dailyreport-app/static/js/main.a92c7273.js.map",
+    "main.acd08893.js.map": "/dailyreport-app/static/js/main.acd08893.js.map",
     "453.39fa0abe.chunk.js.map": "/dailyreport-app/static/js/453.39fa0abe.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.3f443273.css",
-    "static/js/main.a92c7273.js"
+    "static/js/main.acd08893.js"
   ]
 }
