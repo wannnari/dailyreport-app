@@ -561,7 +561,6 @@ label {
 }
 
 @media (max-width: 768px) {
-
   .desktop-only {
     display: none;
   }
@@ -569,11 +568,23 @@ label {
   .mobile-only {
     display: block;
   }
-
 }
 .page-header {
   width: 100%;
   display: flex;
   justify-content: space-between;
   text-align: left;
+}
+
+input,
+select,
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.form-item {
+  min-width: 0;
 }

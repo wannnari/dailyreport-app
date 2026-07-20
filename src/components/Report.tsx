@@ -28,7 +28,10 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const previewText = buildReportText(report);
   const [isListOpen, setIsListOpen] = useState(false);
-  const [reports, setReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<Report[]>(() => {
+    const savedReports = localStorage.getItem("reports");
+    return savedReports ? JSON.parse(savedReports) : [];
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
 
   // 開始・終了時間のonChangeイベント
