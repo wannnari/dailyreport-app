@@ -381,6 +381,7 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
           <PreviewModal
             report={report}
             onClose={() => setIsPreviewOpen(false)}
+            showMessage={showMessage}
           />
         )}
         {isListOpen && (

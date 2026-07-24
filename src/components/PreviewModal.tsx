@@ -6,9 +6,10 @@ import { buildReportText } from "../utils/buildReportText";
 type Props = {
   report: Report;
   onClose: () => void;
+  showMessage: (text: string) => void;
 };
 
-const PreviewModal = ({ report, onClose }: Props) => {
+const PreviewModal = ({ report, onClose, showMessage }: Props) => {
   const reportText = buildReportText(report);
   return (
     <div className="modal-overlay">
@@ -27,7 +28,11 @@ const PreviewModal = ({ report, onClose }: Props) => {
             <button
               className="primary"
               id="modalCopyButton"
-              onClick={() => copyToClipboard(reportText)}
+              onClick={() => {
+                copyToClipboard(reportText);
+                showMessage("保存しました");
+                onClose();
+              }}
             >
               📋 コピー
             </button>
