@@ -34,9 +34,19 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSettingOpen, setIsSettingOpen] = useState(false);
-  const [standardHours, setStandardHours] = useState(8);
-  const [standardMinutes, setStandardMinutes] = useState(0);
+  const [standardHours, setStandardHours] = useState(() =>{
+    return Number(localStorage.getItem("standardHours")) || 8;
+  });
+  const [standardMinutes, setStandardMinutes] = useState(()=>{
+    return Number(localStorage.getItem("standardMinutes")) || 0;
+  });
   const standardWorkMinutes = standardHours * 60 + standardMinutes;
+  const [leaveDays, setLeaveDays] = useState(()=>{
+    return Number(localStorage.getItem("leaveDays")) || 0;
+  });
+
+  // 祝日暫定対応
+  // 今後API連携などで対応予定
 const holidays = [
   "2026-01-01",
   "2026-01-12",
@@ -214,8 +224,11 @@ const holidays = [
   return Math.max(end - start - 60, 0);
 };
 
-const selectedDate = new Date(`${report.date}T00:00:00`);
+/**
+ * 見込み労働時間暫定対応START
+ */
 
+const selectedDate = new Date(`${report.date}T00:00:00`);
 const monthlyReports = reports.filter((item) => {
   const date = new Date(`${item.date}T00:00:00`);
 
@@ -257,25 +270,40 @@ const getWeekdays = (year: number, month: number) => {
 };
 const year = selectedDate.getFullYear();
 const month = selectedDate.getMonth();
-
 const weekdays = getWeekdays(year, month);
-
 const workedDays = monthlyReports.length;
 
+const businessDays = getWeekdays(
+  selectedDate.getFullYear(),
+  selectedDate.getMonth()
+);
+const scheduledWorkDays = Math.max(
+  businessDays - leaveDays,
+  0
+);
 const remainingDays = Math.max(
-  weekdays - workedDays,
+  scheduledWorkDays - workedDays,
   0
 );
 
 const estimatedMinutes = actualMinutes + remainingDays * standardWorkMinutes;
-
 const formatMinutes = (minutes: number) => {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-
-  return `${hours}時間${String(mins).padStart(2, "0")}分`;
+  return `${(minutes / 60).toFixed(2)}h`;
 };
-  const previewText = buildReportText(report,formatMinutes(estimatedMinutes));
+
+const previewText = buildReportText(report,formatMinutes(estimatedMinutes));
+
+// 基本設定時間保存処理
+const handleSaveSettings = () => {
+  localStorage.setItem("standardHours", String(standardHours));
+  localStorage.setItem("standardMinutes", String(standardMinutes));
+  localStorage.setItem("leaveDays", String(leaveDays));
+  setIsSettingOpen(false);
+};
+/**
+ * 見込み労働時間暫定対応END
+ */
+
   return (
     <div className="report">
       <header className="page-header">
@@ -302,7 +330,7 @@ const formatMinutes = (minutes: number) => {
           )}
           <div className="monthly-summary">
             <div className="monthly-summary-head">
-              <p className="monthly-summary-title">📊 今月の勤務状況</p>
+              <p className="monthly-summary-title">今月の勤務状況</p>
               <button className="settings-button" id="settingsButton" type="button"
               onClick={()=> setIsSettingOpen(prev => !prev)}>⚙ 勤務設定</button>
             </div>
@@ -310,6 +338,7 @@ const formatMinutes = (minutes: number) => {
             <div className="monthly-grid">
               <div className="monthly-stat"><span>実績</span><strong id="actualMonthlyTime">{formatMinutes(actualMinutes)}</strong></div>
               <div className="monthly-stat"><span>基本勤務</span><strong id="standardWorkLabel">{standardHours}時間{standardMinutes}分 / 日</strong></div>
+              <div className="monthly-stat"><span>休暇・欠勤数</span><strong id="standardWorkLabel">{leaveDays}日</strong></div>
             </div>
             {isSettingOpen && (
               <div className="settings-panel" id="settingsPanel">
@@ -327,7 +356,20 @@ const formatMinutes = (minutes: number) => {
                     <span>分</span>
                   </div>
                 </div>
-                <p className="settings-help">土日を除いた平日を勤務予定日として自動計算します。祝日対応は今後追加できます。</p>
+                <div className="holiday-setting">
+                  <div>
+                    <label style={{marginTop:0}}>有休・欠勤日数</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={leaveDays}
+                      onChange={(e) => setLeaveDays(Number(e.target.value))}
+                    />
+                    <span>日</span>
+                    </div>
+                </div>
+                <p className="settings-help">土日を除いた平日を勤務予定日として自動計算します。</p>
+                <button type="button" onClick={handleSaveSettings}>保存</button>
             </div>
             )}
           </div>
