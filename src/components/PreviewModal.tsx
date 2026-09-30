@@ -5,18 +5,19 @@ import { buildReportText } from "../utils/buildReportText";
 
 type Props = {
   report: Report;
+  estimatedMinutes: String,
   onClose: () => void;
   showMessage: (text: string) => void;
 };
 
-const PreviewModal = ({ report, onClose, showMessage }: Props) => {
-  const reportText = buildReportText(report);
+const PreviewModal = ({ report, estimatedMinutes, onClose, showMessage }: Props) => {
+  const reportText = buildReportText(report, estimatedMinutes);
   return (
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="preview-box" id="modalPreview">
           <h2>プレビュー</h2>
-          <PreviewContent report={report} />
+          <PreviewContent report={report} estimatedMinutes={estimatedMinutes}/>
           <div className="modal-actions">
             <button
               className="secondary"

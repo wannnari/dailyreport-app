@@ -2,7 +2,7 @@ import "../App.css";
 import { Report } from "../types/report";
 import { formatDateMMDDwithDay } from "../utils/formatDateMMDDwithDay";
 
-const PreviewContent = ({ report }: { report: Report }) => {
+const PreviewContent = ({ report, estimatedMinutes }: { report: Report, estimatedMinutes:String }) => {
   const date = formatDateMMDDwithDay(report.date);
   return (
     <div>
@@ -16,7 +16,7 @@ const PreviewContent = ({ report }: { report: Report }) => {
         </p>
         <p>③ {report.workMemo}</p>
         <p>④ {report.memo}</p>
-        <p>⑤ {report.overTime}</p>
+        <p>⑤ {estimatedMinutes}</p>
       </div>
     </div>
   );

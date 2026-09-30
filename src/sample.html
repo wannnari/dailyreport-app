@@ -370,6 +370,32 @@
         margin-top: 14px;
       }
 
+
+      .monthly-summary {
+        margin-bottom: 24px;
+        padding: 20px;
+        border: 1px solid #bfdbfe;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #eff6ff, #ffffff);
+      }
+      .monthly-summary-head { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:16px; }
+      .monthly-summary-title { margin:0; font-size:16px; font-weight:800; }
+      .settings-button { padding:9px 12px; background:white; border:1px solid var(--border); color:var(--text); }
+      .monthly-main { font-size:30px; font-weight:800; color:var(--blue); margin:4px 0 16px; }
+      .monthly-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+      .monthly-stat { background:white; border:1px solid var(--border); border-radius:8px; padding:12px; }
+      .monthly-stat span { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
+      .monthly-stat strong { font-size:14px; }
+      .day-status { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+      .day-option { border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center; cursor:pointer; font-weight:700; background:white; }
+      .day-option input { display:none; }
+      .day-option.active { border-color:var(--blue); background:var(--blue-light); color:var(--blue); }
+      .settings-panel { display:none; margin-top:14px; padding:16px; border:1px solid var(--border); border-radius:8px; background:#f8fafc; }
+      .settings-panel.open { display:block; }
+      .settings-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:end; }
+      .settings-help { color:var(--muted); font-size:12px; margin:10px 0 0; line-height:1.6; }
+      .hidden { display:none !important; }
+
       @media (max-width: 900px) {
         .layout {
           grid-template-columns: 1fr;
@@ -420,6 +446,7 @@
         .modal-actions {
           grid-template-columns: 1fr;
         }
+        .monthly-grid, .settings-row { grid-template-columns: 1fr; }
       }
     </style>
   </head>
@@ -441,8 +468,37 @@
           <h2 class="section-heading">✏️ 日報入力</h2>
           <p class="section-description">各項目を入力してください</p>
 
+          <div class="monthly-summary">
+            <div class="monthly-summary-head">
+              <p class="monthly-summary-title">📊 今月の勤務状況</p>
+              <button class="settings-button" id="settingsButton">⚙ 勤務設定</button>
+            </div>
+            <div class="monthly-main" id="estimatedMonthlyTime">168時間00分</div>
+            <div class="monthly-grid">
+              <div class="monthly-stat"><span>実績</span><strong id="actualMonthlyTime">0時間00分</strong></div>
+              <div class="monthly-stat"><span>残り予定</span><strong id="remainingMonthlyTime">168時間00分</strong></div>
+              <div class="monthly-stat"><span>基本勤務</span><strong id="standardWorkLabel">8時間00分 / 日</strong></div>
+            </div>
+            <div class="settings-panel" id="settingsPanel">
+              <div class="settings-row">
+                <div><label for="standardHours" style="margin-top:0">1日の基本労働時間</label><input id="standardHours" type="number" min="0" max="24" value="8" /></div>
+                <div><label for="standardMinutes" style="margin-top:0">分</label><input id="standardMinutes" type="number" min="0" max="59" step="15" value="0" /></div>
+              </div>
+              <p class="settings-help">土日を除いた平日を勤務予定日として自動計算します。祝日対応は今後追加できます。</p>
+            </div>
+          </div>
+
           <label for="date">日付</label>
           <input id="date" type="date" />
+
+          <label>勤務状態</label>
+          <div class="day-status">
+            <label class="day-option active" id="workDayOption"><input type="radio" name="dayStatus" value="work" checked />💼 勤務</label>
+            <label class="day-option" id="paidLeaveOption"><input type="radio" name="dayStatus" value="paidLeave" />🌿 有給</label>
+            <label class="day-option" id="holidayOption"><input type="radio" name="dayStatus" value="holiday" />☕ 休み</label>
+          </div>
+
+          <div id="workFields">
 
           <label>出退勤時間</label>
           <div class="time-grid">
@@ -493,6 +549,8 @@
             id="memo"
             placeholder="特記事項があれば入力してください"
           ></textarea>
+
+          </div>
 
           <div class="buttons">
             <button class="secondary" id="copyLastButton">↩ 前回コピー</button>
@@ -599,6 +657,18 @@
       const modalCloseButton = document.getElementById("modalCloseButton");
       const modalCopyButton = document.getElementById("modalCopyButton");
       const previewModal = document.getElementById("previewModal");
+      const settingsButton = document.getElementById("settingsButton");
+      const settingsPanel = document.getElementById("settingsPanel");
+      const standardHours = document.getElementById("standardHours");
+      const standardMinutes = document.getElementById("standardMinutes");
+      const standardWorkLabel = document.getElementById("standardWorkLabel");
+      const estimatedMonthlyTime = document.getElementById("estimatedMonthlyTime");
+      const actualMonthlyTime = document.getElementById("actualMonthlyTime");
+      const remainingMonthlyTime = document.getElementById("remainingMonthlyTime");
+      const workFields = document.getElementById("workFields");
+      const workDayOption = document.getElementById("workDayOption");
+      const paidLeaveOption = document.getElementById("paidLeaveOption");
+      const holidayOption = document.getElementById("holidayOption");
 
       const STORAGE_KEY = "daily-report-last";
 
@@ -632,13 +702,72 @@
         workTime.textContent = `勤務時間：${hours}時間${String(minutes).padStart(2, "0")}分`;
       }
 
+      function selectedDayStatus() {
+        return document.querySelector('input[name="dayStatus"]:checked').value;
+      }
+
+      function formatMinutes(total) {
+        const h = Math.floor(total / 60);
+        const m = total % 60;
+        return `${h}時間${String(m).padStart(2, "0")}分`;
+      }
+
+      function weekdayCount(year, month) {
+        let count = 0;
+        const last = new Date(year, month + 1, 0).getDate();
+        for (let d = 1; d <= last; d++) {
+          const day = new Date(year, month, d).getDay();
+          if (day !== 0 && day !== 6) count++;
+        }
+        return count;
+      }
+
+      function updateMonthlyEstimate() {
+        const base = Number(standardHours.value || 0) * 60 + Number(standardMinutes.value || 0);
+        const current = dateInput.value ? new Date(`${dateInput.value}T00:00:00`) : new Date();
+        const weekdays = weekdayCount(current.getFullYear(), current.getMonth());
+        // UIモック: 登録済み履歴の代わりに当日の入力値を実績として反映
+        let actual = 0;
+        let consumedDays = 0;
+        if (selectedDayStatus() === "work") {
+          const [ih, im] = inTimeInput.value.split(":").map(Number);
+          const [oh, om] = outTimeInput.value.split(":").map(Number);
+          actual = Math.max((oh * 60 + om) - (ih * 60 + im) - 60, 0);
+          consumedDays = 1;
+        } else if (selectedDayStatus() === "paidLeave" || selectedDayStatus() === "holiday") {
+          consumedDays = 1;
+        }
+        const remaining = Math.max(weekdays - consumedDays, 0) * base;
+        const estimate = actual + remaining;
+        actualMonthlyTime.textContent = formatMinutes(actual);
+        remainingMonthlyTime.textContent = formatMinutes(remaining);
+        estimatedMonthlyTime.textContent = formatMinutes(estimate);
+        standardWorkLabel.textContent = `${formatMinutes(base)} / 日`;
+      }
+
+      function updateDayStatus() {
+        const status = selectedDayStatus();
+        workDayOption.classList.toggle("active", status === "work");
+        paidLeaveOption.classList.toggle("active", status === "paidLeave");
+        holidayOption.classList.toggle("active", status === "holiday");
+        workFields.classList.toggle("hidden", status !== "work");
+        updateMonthlyEstimate();
+        renderPreview();
+      }
+
       function buildText() {
         const memo = memoInput.value.trim();
-        return `① 出退勤（in-out）\n--------------------\n${formatDate(dateInput.value)}　${inTimeInput.value}〜${outTimeInput.value}\n\n② PJ名 / 常駐先企業名 / 出社場所\n--------------------\n${projectInput.value || "（未入力）"} / ${clientInput.value || "（未入力）"} / ${placeInput.value || "（未入力）"}(${selectedWorkStyle()})${memo ? `\n\nメモ\n--------------------\n${memo}` : ""}`;
+        const status = selectedDayStatus();
+        if (status !== "work") {
+          const label = status === "paidLeave" ? "有給" : "休み";
+          return `① 日付\n--------------------\n${formatDate(dateInput.value)}\n\n勤務状態\n--------------------\n${label}\n\n⑤ 当月見込み労働時間\n--------------------\n${estimatedMonthlyTime.textContent}`;
+        }
+        return `① 出退勤（in-out）\n--------------------\n${formatDate(dateInput.value)}　${inTimeInput.value}〜${outTimeInput.value}\n\n② PJ名 / 常駐先企業名 / 出社場所\n--------------------\n${projectInput.value || "（未入力）"} / ${clientInput.value || "（未入力）"} / ${placeInput.value || "（未入力）"}(${selectedWorkStyle()})\n\n⑤ 当月見込み労働時間\n--------------------\n${estimatedMonthlyTime.textContent}${memo ? `\n\nメモ\n--------------------\n${memo}` : ""}`;
       }
 
       function renderPreview() {
         calculateWorkTime();
+        updateMonthlyEstimate();
         const text = buildText();
         preview.textContent = text;
         modalPreview.textContent = text;
@@ -739,7 +868,13 @@
         });
       });
 
+      settingsButton.addEventListener("click", () => settingsPanel.classList.toggle("open"));
+      standardHours.addEventListener("input", renderPreview);
+      standardMinutes.addEventListener("input", renderPreview);
+      document.querySelectorAll('input[name="dayStatus"]').forEach((el) => el.addEventListener("change", updateDayStatus));
+
       setToday();
+      updateDayStatus();
       renderPreview();
     </script>
   </body>

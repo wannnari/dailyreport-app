@@ -26,13 +26,17 @@ type Props = {
 export default function ReportForm({ report, setReport, showMessage }: Props) {
   const [errors, setErrors] = useState<validateErrors>();
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
-  const previewText = buildReportText(report);
+
   const [isListOpen, setIsListOpen] = useState(false);
   const [reports, setReports] = useState<Report[]>(() => {
     const savedReports = localStorage.getItem("reports");
     return savedReports ? JSON.parse(savedReports) : [];
   });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isSettingOpen, setIsSettingOpen] = useState(false);
+  const [standardHours, setStandardHours] = useState(8);
+  const [standardMinutes, setStandardMinutes] = useState(0);
+  const standardWorkMinutes = standardHours * 60 + standardMinutes;
 
   // 開始・終了時間のonChangeイベント
   const handleChangeTime = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,6 +179,76 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
     showMessage("編集モードにしました");
   };
 
+  const calculateWorkMinutes = (
+  inTime: string,
+  outTime: string
+) => {
+  const [inHour, inMinute] = inTime.split(":").map(Number);
+  const [outHour, outMinute] = outTime.split(":").map(Number);
+
+  const start = inHour * 60 + inMinute;
+  const end = outHour * 60 + outMinute;
+
+  // 休憩1時間
+  return Math.max(end - start - 60, 0);
+};
+
+const selectedDate = new Date(`${report.date}T00:00:00`);
+
+const monthlyReports = reports.filter((item) => {
+  const date = new Date(`${item.date}T00:00:00`);
+
+  return (
+    date.getFullYear() === selectedDate.getFullYear() &&
+    date.getMonth() === selectedDate.getMonth()
+  );
+});
+
+const actualMinutes = monthlyReports.reduce((total, item) => {
+  return total + calculateWorkMinutes(
+    item.inTime,
+    item.outTime
+  );
+}, 0);
+
+/** 平日数の算出 */
+const getWeekdays = (year: number, month: number) => {
+  let count = 0;
+
+  const lastDay = new Date(year, month + 1, 0).getDate();
+
+  for (let day = 1; day <= lastDay; day++) {
+    const date = new Date(year, month, day);
+    const weekDay = date.getDay();
+
+    if (weekDay !== 0 && weekDay !== 6) {
+      count++;
+    }
+  }
+
+  return count;
+};
+const year = selectedDate.getFullYear();
+const month = selectedDate.getMonth();
+
+const weekdays = getWeekdays(year, month);
+
+const workedDays = monthlyReports.length;
+
+const remainingDays = Math.max(
+  weekdays - workedDays,
+  0
+);
+
+const estimatedMinutes = actualMinutes + remainingDays * standardWorkMinutes;
+
+const formatMinutes = (minutes: number) => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  return `${hours}時間${String(mins).padStart(2, "0")}分`;
+};
+  const previewText = buildReportText(report,formatMinutes(estimatedMinutes));
   return (
     <div className="report">
       <header className="page-header">
@@ -197,8 +271,39 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
             <div className="edit-mode-banner">
               編集モード：保存すると既存の履歴を更新します
               <button onClick={() => setEditingId(null)}>解除</button>
-            </div>
+            </div> 
           )}
+          <div className="monthly-summary">
+            <div className="monthly-summary-head">
+              <p className="monthly-summary-title">📊 今月の勤務状況</p>
+              <button className="settings-button" id="settingsButton" type="button"
+              onClick={()=> setIsSettingOpen(prev => !prev)}>⚙ 勤務設定</button>
+            </div>
+            <div className="monthly-main" id="estimatedMonthlyTime">{formatMinutes(estimatedMinutes)}</div>
+            <div className="monthly-grid">
+              <div className="monthly-stat"><span>実績</span><strong id="actualMonthlyTime">{formatMinutes(actualMinutes)}</strong></div>
+              <div className="monthly-stat"><span>基本勤務</span><strong id="standardWorkLabel">{standardHours}時間{standardMinutes}分 / 日</strong></div>
+            </div>
+            {isSettingOpen && (
+              <div className="settings-panel" id="settingsPanel">
+                <div className="work-time-setting">
+                  <div>
+                    <label htmlFor="standardHours" style={{marginTop:0}}>1日の基本労働時間</label>
+                    <input id="standardHours" type="number" min="0" max="24" value={standardHours}
+                          onChange={(e) => setStandardHours(Number(e.target.value))}/>
+                    <span>時間</span>
+                  </div>
+                  <div>
+                    <label htmlFor="standardMinutes" style={{marginTop:0}}></label>
+                    <input id="standardMinutes" type="number" min="0" max="59" value={standardMinutes}
+                        onChange={(e) => setStandardMinutes(Number(e.target.value))}/>
+                    <span>分</span>
+                  </div>
+                </div>
+                <p className="settings-help">土日を除いた平日を勤務予定日として自動計算します。祝日対応は今後追加できます。</p>
+            </div>
+            )}
+          </div>
           <label htmlFor="date">日付</label>
           <input
             id="date"
@@ -375,11 +480,13 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
             histories={
               JSON.parse(localStorage.getItem("reports") ?? "[]") as Report[]
             }
+            estimatedMinutes={formatMinutes(estimatedMinutes)}
           />
         </div>
         {isPreviewOpen && (
           <PreviewModal
             report={report}
+            estimatedMinutes={formatMinutes(estimatedMinutes)}
             onClose={() => setIsPreviewOpen(false)}
             showMessage={showMessage}
           />
