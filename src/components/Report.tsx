@@ -37,6 +37,27 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
   const [standardHours, setStandardHours] = useState(8);
   const [standardMinutes, setStandardMinutes] = useState(0);
   const standardWorkMinutes = standardHours * 60 + standardMinutes;
+const holidays = [
+  "2026-01-01",
+  "2026-01-12",
+  "2026-02-11",
+  "2026-02-23",
+  "2026-03-20",
+  "2026-04-29",
+  "2026-05-03",
+  "2026-05-04",
+  "2026-05-05",
+  "2026-05-06",
+  "2026-07-20",
+  "2026-08-11",
+  "2026-09-21",
+  "2026-09-22",
+  "2026-09-23",
+  "2026-10-12",
+  "2026-11-03",
+  "2026-11-23",
+];
+
 
   // 開始・終了時間のonChangeイベント
   const handleChangeTime = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -221,7 +242,13 @@ const getWeekdays = (year: number, month: number) => {
     const date = new Date(year, month, day);
     const weekDay = date.getDay();
 
-    if (weekDay !== 0 && weekDay !== 6) {
+    const dateString =
+      `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+    const isWeekend = weekDay === 0 || weekDay === 6;
+    const isHoliday = holidays.includes(dateString);
+
+    if (!isWeekend && !isHoliday) {
       count++;
     }
   }
