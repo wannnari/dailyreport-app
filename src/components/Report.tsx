@@ -6,6 +6,7 @@ import "../App.css";
 import PreviewPanel from "./PreviewPanel";
 import ReportListModal from "../components/ReportListModal";
 import PreviewModal from "./PreviewModal";
+import CalendarModal from "./CalendarModal";
 
 import { Report, InitialReport, setTodayForInitialize } from "../types/report";
 import { TimeString } from "../types/Time";
@@ -16,6 +17,7 @@ import { calcWorkTime } from "../utils/calcWorkTime";
 import { calcOverTime } from "../utils/calcOverTime";
 import { copyToClipboard } from "../utils/CopyToClipboard";
 import { validateReport } from "../utils/ValidateReport";
+import { isHoliday } from "../utils/holidays";
 
 type Props = {
   report: Report;
@@ -34,40 +36,42 @@ export default function ReportForm({ report, setReport, showMessage }: Props) {
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSettingOpen, setIsSettingOpen] = useState(false);
-  const [standardHours, setStandardHours] = useState(() =>{
+  const [standardHours, setStandardHours] = useState(() => {
     return Number(localStorage.getItem("standardHours")) || 8;
   });
-  const [standardMinutes, setStandardMinutes] = useState(()=>{
+  const [standardMinutes, setStandardMinutes] = useState(() => {
     return Number(localStorage.getItem("standardMinutes")) || 0;
   });
   const standardWorkMinutes = standardHours * 60 + standardMinutes;
-  const [leaveDays, setLeaveDays] = useState(()=>{
+  const [leaveDays, setLeaveDays] = useState(() => {
     return Number(localStorage.getItem("leaveDays")) || 0;
   });
 
+  // カレンダー用
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
   // 祝日暫定対応
   // 今後API連携などで対応予定
-const holidays = [
-  "2026-01-01",
-  "2026-01-12",
-  "2026-02-11",
-  "2026-02-23",
-  "2026-03-20",
-  "2026-04-29",
-  "2026-05-03",
-  "2026-05-04",
-  "2026-05-05",
-  "2026-05-06",
-  "2026-07-20",
-  "2026-08-11",
-  "2026-09-21",
-  "2026-09-22",
-  "2026-09-23",
-  "2026-10-12",
-  "2026-11-03",
-  "2026-11-23",
-];
-
+  const holidays = [
+    "2026-01-01",
+    "2026-01-12",
+    "2026-02-11",
+    "2026-02-23",
+    "2026-03-20",
+    "2026-04-29",
+    "2026-05-03",
+    "2026-05-04",
+    "2026-05-05",
+    "2026-05-06",
+    "2026-07-20",
+    "2026-08-11",
+    "2026-09-21",
+    "2026-09-22",
+    "2026-09-23",
+    "2026-10-12",
+    "2026-11-03",
+    "2026-11-23",
+  ];
 
   // 開始・終了時間のonChangeイベント
   const handleChangeTime = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -210,99 +214,82 @@ const holidays = [
     showMessage("編集モードにしました");
   };
 
-  const calculateWorkMinutes = (
-  inTime: string,
-  outTime: string
-) => {
-  const [inHour, inMinute] = inTime.split(":").map(Number);
-  const [outHour, outMinute] = outTime.split(":").map(Number);
+  const calculateWorkMinutes = (inTime: string, outTime: string) => {
+    const [inHour, inMinute] = inTime.split(":").map(Number);
+    const [outHour, outMinute] = outTime.split(":").map(Number);
 
-  const start = inHour * 60 + inMinute;
-  const end = outHour * 60 + outMinute;
+    const start = inHour * 60 + inMinute;
+    const end = outHour * 60 + outMinute;
 
-  // 休憩1時間
-  return Math.max(end - start - 60, 0);
-};
+    // 休憩1時間
+    return Math.max(end - start - 60, 0);
+  };
 
-/**
- * 見込み労働時間暫定対応START
- */
+  /**
+   * 見込み労働時間暫定対応START
+   */
 
-const selectedDate = new Date(`${report.date}T00:00:00`);
-const monthlyReports = reports.filter((item) => {
-  const date = new Date(`${item.date}T00:00:00`);
+  const selectedDate = new Date(`${report.date}T00:00:00`);
+  const monthlyReports = reports.filter((item) => {
+    const date = new Date(`${item.date}T00:00:00`);
 
-  return (
-    date.getFullYear() === selectedDate.getFullYear() &&
-    date.getMonth() === selectedDate.getMonth()
-  );
-});
+    return (
+      date.getFullYear() === selectedDate.getFullYear() &&
+      date.getMonth() === selectedDate.getMonth()
+    );
+  });
 
-const actualMinutes = monthlyReports.reduce((total, item) => {
-  return total + calculateWorkMinutes(
-    item.inTime,
-    item.outTime
-  );
-}, 0);
+  const actualMinutes = monthlyReports.reduce((total, item) => {
+    return total + calculateWorkMinutes(item.inTime, item.outTime);
+  }, 0);
 
-/** 平日数の算出 */
-const getWeekdays = (year: number, month: number) => {
-  let count = 0;
+  /** 平日数の算出 */
+  const getWeekdays = (year: number, month: number) => {
+    let count = 0;
 
-  const lastDay = new Date(year, month + 1, 0).getDate();
+    const lastDay = new Date(year, month + 1, 0).getDate();
 
-  for (let day = 1; day <= lastDay; day++) {
-    const date = new Date(year, month, day);
-    const weekDay = date.getDay();
+    for (let day = 1; day <= lastDay; day++) {
+      const date = new Date(year, month, day);
+      const weekDay = date.getDay();
 
-    const dateString =
-      `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const dateString = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
-    const isWeekend = weekDay === 0 || weekDay === 6;
-    const isHoliday = holidays.includes(dateString);
-
-    if (!isWeekend && !isHoliday) {
-      count++;
+      const isWeekend = weekDay === 0 || weekDay === 6;
+      const holiday = isHoliday(dateString);
+      if (!isWeekend && !holiday) {
+        count++;
+      }
     }
-  }
 
-  return count;
-};
-const year = selectedDate.getFullYear();
-const month = selectedDate.getMonth();
-const weekdays = getWeekdays(year, month);
-const workedDays = monthlyReports.length;
+    return count;
+  };
 
-const businessDays = getWeekdays(
-  selectedDate.getFullYear(),
-  selectedDate.getMonth()
-);
-const scheduledWorkDays = Math.max(
-  businessDays - leaveDays,
-  0
-);
-const remainingDays = Math.max(
-  scheduledWorkDays - workedDays,
-  0
-);
+  const workedDays = monthlyReports.length;
 
-const estimatedMinutes = actualMinutes + remainingDays * standardWorkMinutes;
-const formatMinutes = (minutes: number) => {
-  return `${(minutes / 60).toFixed(2)}h`;
-};
+  const businessDays = getWeekdays(
+    selectedDate.getFullYear(),
+    selectedDate.getMonth(),
+  );
+  const scheduledWorkDays = Math.max(businessDays - leaveDays, 0);
+  const remainingDays = Math.max(scheduledWorkDays - workedDays, 0);
+  const estimatedMinutes = actualMinutes + remainingDays * standardWorkMinutes;
+  const formatMinutes = (minutes: number) => {
+    return `${(minutes / 60).toFixed(2)}h`;
+  };
 
-const previewText = buildReportText(report,formatMinutes(estimatedMinutes));
+  const previewText = buildReportText(report, formatMinutes(estimatedMinutes));
 
-// 基本設定時間保存処理
-const handleSaveSettings = () => {
-  localStorage.setItem("standardHours", String(standardHours));
-  localStorage.setItem("standardMinutes", String(standardMinutes));
-  localStorage.setItem("leaveDays", String(leaveDays));
-  setIsSettingOpen(false);
-};
-/**
- * 見込み労働時間暫定対応END
- */
+  // 基本設定時間保存処理
+  const handleSaveSettings = () => {
+    localStorage.setItem("standardHours", String(standardHours));
+    localStorage.setItem("standardMinutes", String(standardMinutes));
+    localStorage.setItem("leaveDays", String(leaveDays));
+    setIsSettingOpen(false);
+  };
+  /**
+   * 見込み労働時間暫定対応END
+   */
 
   return (
     <div className="report">
@@ -326,39 +313,79 @@ const handleSaveSettings = () => {
             <div className="edit-mode-banner">
               編集モード：保存すると既存の履歴を更新します
               <button onClick={() => setEditingId(null)}>解除</button>
-            </div> 
+            </div>
           )}
           <div className="monthly-summary">
             <div className="monthly-summary-head">
               <p className="monthly-summary-title">今月の勤務状況</p>
-              <button className="settings-button" id="settingsButton" type="button"
-              onClick={()=> setIsSettingOpen(prev => !prev)}>⚙ 勤務設定</button>
+              <button
+                className="settings-button"
+                id="settingsButton"
+                type="button"
+                onClick={() => setIsSettingOpen((prev) => !prev)}
+              >
+                ⚙ 勤務設定
+              </button>
             </div>
-            <div className="monthly-main" id="estimatedMonthlyTime">{formatMinutes(estimatedMinutes)}</div>
+            <div className="monthly-main" id="estimatedMonthlyTime">
+              {formatMinutes(estimatedMinutes)}
+            </div>
             <div className="monthly-grid">
-              <div className="monthly-stat"><span>実績</span><strong id="actualMonthlyTime">{formatMinutes(actualMinutes)}</strong></div>
-              <div className="monthly-stat"><span>基本勤務</span><strong id="standardWorkLabel">{standardHours}時間{standardMinutes}分 / 日</strong></div>
-              <div className="monthly-stat"><span>休暇・欠勤数</span><strong id="standardWorkLabel">{leaveDays}日</strong></div>
+              <div className="monthly-stat">
+                <span>実績</span>
+                <strong id="actualMonthlyTime">
+                  {formatMinutes(actualMinutes)}
+                </strong>
+              </div>
+              <div className="monthly-stat">
+                <span>基本勤務</span>
+                <strong id="standardWorkLabel">
+                  {standardHours}時間{standardMinutes}分 / 日
+                </strong>
+              </div>
+              <div className="monthly-stat">
+                <span>休暇・欠勤数</span>
+                <strong id="standardWorkLabel">{leaveDays}日</strong>
+              </div>
             </div>
             {isSettingOpen && (
               <div className="settings-panel" id="settingsPanel">
                 <div className="work-time-setting">
                   <div>
-                    <label htmlFor="standardHours" style={{marginTop:0}}>1日の基本労働時間</label>
-                    <input id="standardHours" type="number" min="0" max="24" value={standardHours}
-                          onChange={(e) => setStandardHours(Number(e.target.value))}/>
+                    <label htmlFor="standardHours" style={{ marginTop: 0 }}>
+                      1日の基本労働時間
+                    </label>
+                    <input
+                      id="standardHours"
+                      type="number"
+                      min="0"
+                      max="24"
+                      value={standardHours}
+                      onChange={(e) => setStandardHours(Number(e.target.value))}
+                    />
                     <span>時間</span>
                   </div>
                   <div>
-                    <label htmlFor="standardMinutes" style={{marginTop:0}}></label>
-                    <input id="standardMinutes" type="number" min="0" max="59" value={standardMinutes}
-                        onChange={(e) => setStandardMinutes(Number(e.target.value))}/>
+                    <label
+                      htmlFor="standardMinutes"
+                      style={{ marginTop: 0 }}
+                    ></label>
+                    <input
+                      id="standardMinutes"
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={standardMinutes}
+                      onChange={(e) =>
+                        setStandardMinutes(Number(e.target.value))
+                      }
+                    />
                     <span>分</span>
                   </div>
                 </div>
                 <div className="holiday-setting">
                   <div>
-                    <label style={{marginTop:0}}>有休・欠勤日数</label>
+                    <label style={{ marginTop: 0 }}>有休・欠勤日数</label>
                     <input
                       type="number"
                       min="0"
@@ -366,13 +393,24 @@ const handleSaveSettings = () => {
                       onChange={(e) => setLeaveDays(Number(e.target.value))}
                     />
                     <span>日</span>
-                    </div>
+                  </div>
                 </div>
-                <p className="settings-help">土日を除いた平日を勤務予定日として自動計算します。</p>
-                <button type="button" onClick={handleSaveSettings}>保存</button>
-            </div>
+                <p className="settings-help">
+                  土日を除いた平日を勤務予定日として自動計算します。
+                </p>
+                <button type="button" onClick={handleSaveSettings}>
+                  保存
+                </button>
+              </div>
             )}
           </div>
+          <button
+            type="button"
+            className="calendar-open-button"
+            onClick={() => setIsCalendarOpen(true)}
+          >
+            📅 カレンダーを開く
+          </button>
           <label htmlFor="date">日付</label>
           <input
             id="date"
@@ -575,6 +613,17 @@ const handleSaveSettings = () => {
             }}
             onEdit={startedEditReport}
             onDelete={deleteReport}
+          />
+        )}
+        {isCalendarOpen && (
+          <CalendarModal
+            reports={reports}
+            onClose={() => setIsCalendarOpen(false)}
+            onEdit={(selectedReport) => {
+              startedEditReport(selectedReport);
+              setIsCalendarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
           />
         )}
       </main>
